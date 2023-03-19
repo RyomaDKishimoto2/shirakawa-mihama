@@ -1,12 +1,12 @@
 {
   "name": "firebase-next-auth",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -H 0.0.0.0",
-    "start-localhost": "next start"
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@types/node": "18.15.3",
