@@ -1,3 +1,4 @@
+import { readUser } from '@/lib/user';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -9,7 +10,7 @@ interface LoginType {
 }
 const LoginPage = () => {
   const methods = useForm<LoginType>({ mode: 'onBlur' });
-  const { logIn } = useAuth();
+  const { logIn, liffSignUp } = useAuth();
   const router = useRouter();
   const {
     register,
@@ -23,6 +24,21 @@ const LoginPage = () => {
       router.push('/dashboard');
     } catch (error: any) {
       console.log(error.message);
+    }
+  };
+
+  const onSignInByLine = async () => {
+    try {
+      const userCredential = await liffSignUp();
+      const snap = await readUser({ uid: userCredential.user.uid });
+      if (snap.exists()) {
+        router.push('/dashboard');
+      } else {
+        alert('ユーザーが存在しません');
+        router.push('/signup');
+      }
+    } catch (error: any) {
+      alert(error.message);
     }
   };
   return (
@@ -72,9 +88,23 @@ const LoginPage = () => {
           <div className='flex justify-center pt-8'>
             <button
               type='submit'
-              className={`h-12 text-center w-2/3 bg-blue-900 border-2 rounded-md hover:shadow-lg hover:bg-blue-800 text-lg transition`}
+              className={`h-12 text-center w-full bg-blue-900 border-2 rounded-md hover:shadow-lg hover:bg-blue-800 text-lg transition`}
             >
-              <p className='capitalize text-white font-normal'>submit</p>
+              <p className='capitalize text-white font-normal'>
+                管理者としてログイン
+              </p>
+            </button>
+          </div>
+          <hr className='h-px my-8 bg-gray-200 border-0 dark:bg-gray-700' />
+          <div className='flex justify-center'>
+            <button
+              onClick={onSignInByLine}
+              type='button'
+              className={`h-12 text-center w-full bg-green-500 border-2 rounded-md hover:shadow-lg hover:bg-green-800 text-lg transition`}
+            >
+              <p className='capitalize text-white font-normal'>
+                スタッフとしてログイン
+              </p>
             </button>
           </div>
         </form>
