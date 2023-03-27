@@ -1,20 +1,13 @@
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import type { Liff } from '@line/liff';
 
-const ProtectedRoute = ({
-  children,
-  liff,
-}: {
-  children: React.ReactNode;
-  liff: Liff | null;
-}) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { user } = useAuth();
 
   useEffect(() => {
-    if ((!user.userId && !liff) || (liff && !liff.isLoggedIn())) {
+    if (!user.userId) {
       router.push('/login');
     }
   }, [router, user]);

@@ -80,6 +80,12 @@ export const AuthContextProvider = ({
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if ((!user && !liff) || (liff && !liff.isLoggedIn())) {
+      setUser({ userId: null, role: null });
+    }
+  }, [liff]);
+
   const signUp = (email: string, password: string) => {
     return createUserWithEmailAndPassword(auth, email, password);
   };
