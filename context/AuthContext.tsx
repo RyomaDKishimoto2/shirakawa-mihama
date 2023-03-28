@@ -10,10 +10,10 @@ import { auth } from '../config/firebase';
 import type { Liff } from '@line/liff';
 import { readUser, RoleType } from '@/lib/user';
 
-interface UserType {
+type UserType = {
   userId: string | null;
   role: RoleType | null;
-}
+};
 
 // liff関連のlocalStorageのキーのリストを取得
 const getLiffLocalStorageKeys = (prefix: string) => {
@@ -79,12 +79,6 @@ export const AuthContextProvider = ({
 
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if ((!user && !liff) || (liff && !liff.isLoggedIn())) {
-      setUser({ userId: null, role: null });
-    }
-  }, [liff]);
 
   const signUp = (email: string, password: string) => {
     return createUserWithEmailAndPassword(auth, email, password);

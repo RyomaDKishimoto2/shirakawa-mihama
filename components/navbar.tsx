@@ -46,7 +46,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
         <nav className={`md:flex md:items-center font-title w-full md:w-auto`}>
           <ul className='text-lg inline-block'>
             <>
-              {!user.uid ? (
+              {!user.userId ? (
                 menuItems.map((item) => (
                   <li
                     key={item.id}
