@@ -1,3 +1,4 @@
+import { RoleType } from '@/lib/user';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
@@ -46,7 +47,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
         <nav className={`md:flex md:items-center font-title w-full md:w-auto`}>
           <ul className='text-lg inline-block'>
             <>
-              {!user.userId ? (
+              {!user || !user.userId ? (
                 menuItems.map((item) => (
                   <li
                     key={item.id}
