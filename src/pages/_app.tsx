@@ -1,6 +1,6 @@
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
-import Navbar from '../../components/navbar';
+import Navbar from '../../components/Navbar';
 import { AuthContextProvider } from '../../context/AuthContext';
 import type { Liff } from '@line/liff';
 import { useEffect, useState } from 'react';
