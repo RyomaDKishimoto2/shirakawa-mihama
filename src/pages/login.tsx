@@ -1,6 +1,6 @@
 import { readUser } from '@/lib/user';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useAuth } from '../../context/AuthContext';
 
@@ -20,10 +20,16 @@ const LoginPage = () => {
 
   const onSubmit = async (data: LoginType) => {
     try {
-      await logIn(data.email, data.password);
-      router.push('/dashboard');
+      const userCredential = await logIn(data.email, data.password);
+      const snap = await readUser({ uid: userCredential.user.uid });
+      if (snap.exists()) {
+        router.push('/dashboard');
+      } else {
+        alert('ユーザーが存在しません');
+        router.push('/signup');
+      }
     } catch (error: any) {
-      console.log(error.message);
+      alert(error.message);
     }
   };
 
@@ -41,6 +47,7 @@ const LoginPage = () => {
       alert(error.message);
     }
   };
+
   return (
     <div className='sign-up-form container mx-auto w-96 mt-12 border-2 border-gray-400'>
       <h2 className='px-12 mt-8 text-center text-2xl font-semibold text-blue-900'>
