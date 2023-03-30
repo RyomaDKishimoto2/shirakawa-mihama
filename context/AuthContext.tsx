@@ -13,7 +13,7 @@ import { readUser, RoleType } from '@/lib/user';
 type UserType = {
   userId: string | null;
   role: RoleType | null;
-};
+} | null;
 
 // liff関連のlocalStorageのキーのリストを取得
 const getLiffLocalStorageKeys = (prefix: string) => {
@@ -55,7 +55,7 @@ export const AuthContextProvider = ({
   children: React.ReactNode;
   liff: Liff | null;
 }) => {
-  const [user, setUser] = useState<UserType>({ userId: null, role: null });
+  const [user, setUser] = useState<UserType>();
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -72,11 +72,10 @@ export const AuthContextProvider = ({
           setUser({ userId: null, role: null });
         }
       } else {
-        setUser({ userId: null, role: null });
+        setUser(null);
       }
     });
     setLoading(false);
-
     return () => unsubscribe();
   }, []);
 
