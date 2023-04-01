@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { MONTHS, MonthType, YearType } from '../features/const';
 import { useRouter } from 'next/router';
 import * as ExcelJS from 'exceljs';
@@ -9,10 +9,11 @@ import { isNumber } from '@/utils';
 export const Download: FC = () => {
   const router = useRouter();
   const now = new Date();
+  const year = Number(router.query.year || now.getFullYear()) as YearType;
   const thisMonth = Number(
     router.query.month || now.getMonth() + 1
   ) as MonthType;
-  const year = Number(router.query.year || now.getFullYear()) as YearType;
+  const [selectedMonth, setMonth] = useState<MonthType>(thisMonth);
 
   const onDownload = async () => {
     const res = await axios.get('/keiri.xlsx', {
@@ -23,10 +24,10 @@ export const Download: FC = () => {
     await workbook.xlsx.load(data);
     const sales = await SaleRepository.getSales({
       year,
-      month: thisMonth,
+      month: selectedMonth,
     });
     if (!sales.length) {
-      alert(`${thisMonth}月の日報が存在しません`);
+      alert(`${selectedMonth}月の日報が存在しません`);
       return;
     }
     try {
@@ -73,7 +74,7 @@ export const Download: FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${thisMonth}月.xlsx`;
+      a.download = `${selectedMonth}月.xlsx`;
       a.click();
       a.remove();
       setTimeout(() => {
@@ -88,15 +89,17 @@ export const Download: FC = () => {
     <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
       <div className='flex items-center justify-between max-w-2xl p-2 mx-auto border border-indigo-600 cursor-pointer rounded-xl'>
         <select
-          defaultValue={thisMonth}
-          id='country'
-          name='country'
-          autoComplete='country-name'
+          value={selectedMonth}
+          id='month'
+          name='month'
           className='h-full block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:max-w-xs sm:text-sm sm:leading-6 px-2'
+          onChange={(v) => {
+            setMonth(Number(v.target.value) as MonthType);
+          }}
         >
           {MONTHS.map((month) => {
             return month <= thisMonth ? (
-              <option key={month} selected={thisMonth === month}>
+              <option key={month} value={month}>
                 {month}月の売り上げを
               </option>
             ) : null;
