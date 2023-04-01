@@ -69,3 +69,7 @@ export const calculateSalary = ({
 export const isMembersEmpty = (members: AttendanceType[]): boolean => {
   return !members.length ? true : false;
 };
+
+export const isNumber = (data: number | undefined) => {
+  return !data ? 0 : data;
+};
