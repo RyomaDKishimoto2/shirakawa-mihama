@@ -2,6 +2,7 @@ import { RoleType } from '@/lib/user';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
+import { Download } from './download';
 
 const Navbar = ({ children }: { children: React.ReactNode }) => {
   const { user, logOut } = useAuth();
@@ -37,11 +38,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
     <>
       <header className='flex flex-wrap container mx-auto max-w-full items-center p-6 justify-between bg-white shadow-md sticky top-0 z-50'>
         <div className='flex items-center text-blue-900 hover:text-blue-800 cursor-pointer transition duration-150 '>
-          <Link href='/'>
-            <span className='font-semibold text-lg font-sans'>
-              Firebase Authentication with Next.js
-            </span>
-          </Link>
+          {user && user.role === RoleType.ADMIN ? <Download /> : 'SHIRAKAWA'}
         </div>
 
         <nav className={`md:flex md:items-center font-title w-full md:w-auto`}>
@@ -62,19 +59,21 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                 ))
               ) : (
                 <>
-                  <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
-                    <Link href='/dashboard' legacyBehavior>
-                      <a className='text-blue-800 hover:text-blue-900 transition'>
-                        Dashboard
-                      </a>
-                    </Link>
-                  </li>
+                  {router.pathname !== '/dashboard' ? (
+                    <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
+                      <Link href='/dashboard' legacyBehavior>
+                        <a className='text-lg font-semibold leading-6 text-gray-900'>
+                          日報入力
+                        </a>
+                      </Link>
+                    </li>
+                  ) : null}
                   <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
                     <a
                       onClick={handleLogout}
-                      className='text-blue-800 hover:text-blue-900 transition cursor-pointer'
+                      className='text-lg font-semibold leading-6 text-gray-900'
                     >
-                      Logout
+                      Log out <span aria-hidden='true'>&rarr;</span>
                     </a>
                   </li>
                 </>
