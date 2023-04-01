@@ -19,13 +19,13 @@ export type WeatherType = typeof WEATHERS[number];
 export const STATUS = ['休み', '出勤'] as const;
 export type StatusType = typeof STATUS[number];
 
-export const HOURS = [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25] as const;
+export const HOURS = [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25] as const;
 export type HourType = typeof HOURS[number];
 
 export const MINUTES = [0, 15, 30, 45] as const;
 export type MinuteType = typeof MINUTES[number];
 
-export const HOURLY = [950, 1000, 1100, 1200, 1300, 1400, 1500] as const;
+export const HOURLY = [900, 950, 1000, 1100, 1200, 1300, 1400, 1500] as const;
 export type HouryType = typeof HOURLY[number];
 export type AttendanceType = {
   name: string;
