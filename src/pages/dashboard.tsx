@@ -22,7 +22,6 @@ import {
   MINUTES,
   MinuteType,
   STATUS,
-  MEMBER_INIT_VALUE,
   DaysType,
 } from '../../features/const';
 import { Select } from '../../components/Select';
@@ -39,6 +38,7 @@ import {
 import { MonthlyTbody } from '../../components/Tbody';
 import { QuantityButton } from '../../components/QuantityButton';
 import { Thead } from '../../components/Thead';
+import { Loading } from '../../components/loading';
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
@@ -48,13 +48,14 @@ const DashboardPage: NextPage = () => {
   const day = Number(router.query.day || now.getDate()) as DaysType;
   const theDay = new Date(year, month - 1, day);
   const dayOfWeek = weekItems[theDay.getDay()];
+  const [loading, setLoading] = useState<boolean>(false);
   const [sale, setSale] = useState<SalesType>(SALE_INIT_VALUE);
   const paymentTotal = Object.values(sale.suppliers).reduce(
     (partialSum, a) => partialSum + a,
     0
   );
 
-  const { data: monthlySales } = useSWR(
+  const { data } = useSWR(
     year && month ? `/api/sales/${year}/${month}/${day}` : null,
     async () => {
       return await SaleRepository.getSales({ year, month });
@@ -64,14 +65,25 @@ const DashboardPage: NextPage = () => {
       // revalidateOnMount: false,
       // revalidateOnReconnect: false,
       // refreshWhenOffline: false,
-      // refreshWhenHidden: false,
+      refreshWhenHidden: false,
       // refreshInterval: 0,
     }
   );
 
   useEffect(() => {
-    const target = monthlySales?.find(
-      (data) => data.year === year && data.month === month && data.day === day
+    const target = data?.find(
+      (sale) => sale.year === year && sale.month === month && sale.day === day
+    );
+    const sale = target
+      ? ({ ...target, year, month, day, dayOfWeek } as SalesType)
+      : ({ ...SALE_INIT_VALUE, year, month, day, dayOfWeek } as SalesType);
+
+    setSale(sale);
+  }, [day]);
+
+  useEffect(() => {
+    const target = data?.find(
+      (sale) => sale.year === year && sale.month === month && sale.day === day
     );
 
     const sale = target
@@ -79,30 +91,39 @@ const DashboardPage: NextPage = () => {
       : ({ ...SALE_INIT_VALUE, year, month, day, dayOfWeek } as SalesType);
 
     setSale(sale);
-  }, [monthlySales]);
+  }, []);
 
   const onSubmit = async () => {
-    if (isGuestsEmpty(sale)) {
-      return alert('来客数が未入力です');
-    }
-    if (isMembersEmpty(sale.members.filter((member) => member.name))) {
-      return alert('出勤者が未入力です');
-    }
-    const staffSalaries = sale.members.reduce(
-      (accum, item) => accum + item.amount,
-      0
-    );
-    const param = { ...sale, staffSalaries };
+    setLoading(true);
     try {
+      if (isGuestsEmpty(sale)) {
+        return alert('来客数が未入力です');
+      }
+      if (isMembersEmpty(sale.members.filter((member) => member.name))) {
+        return alert('出勤者が未入力です');
+      }
+      const staffSalaries = sale.members.reduce(
+        (accum, item) => accum + item.amount,
+        0
+      );
+      const param = { ...sale, staffSalaries };
       await SaleRepository.create({ param });
     } catch (e) {
       console.error(e);
+    } finally {
+      setLoading(false);
+      alert('🚀今日もお疲れ様でした😊');
     }
   };
 
   return (
     <ProtectedRoute>
-      <div className='isolate bg-white py-24 px-6 sm:py-32 lg:px-8'>
+      {loading && <Loading />}
+      <div
+        className={`isolate bg-white py-24 px-6 sm:py-32 lg:px-8 ${
+          loading ? 'blur-sm' : ''
+        }`}
+      >
         <div className='mx-auto max-w-3xl content-center'>
           <h2 className='flex items-center justify-center text-center text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>
             {/* <Select
@@ -179,11 +200,7 @@ const DashboardPage: NextPage = () => {
                 </th>
               </tr>
             </thead>
-            <MonthlyTbody
-              day={day}
-              sale={sale}
-              sales={monthlySales ? monthlySales : [sale]}
-            />
+            <MonthlyTbody day={day} sale={sale} sales={data ? data : [sale]} />
           </table>
         </div>
         <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
@@ -410,7 +427,7 @@ const DashboardPage: NextPage = () => {
               {sale.members.map((attendance, attendanceIndex) => {
                 return (
                   <tr key={attendanceIndex} className='border-b'>
-                    <td className='py-4 pl-5 text-lg'>
+                    <td className='py-4 px-5 text-lg w-1/5'>
                       <input
                         type='text'
                         id={`name${attendanceIndex}`}
@@ -575,7 +592,11 @@ const DashboardPage: NextPage = () => {
                         }}
                       />
                     </td>
-                    <td className='px-6 py-4 text-lg'>
+                    <td
+                      className={`px-4 py-4 text-lg ${
+                        attendance.amount < 0 ? 'text-red-700' : ''
+                      }`}
+                    >
                       {attendance.amount.toLocaleString('ja-JP', {
                         style: 'currency',
                         currency: 'JPY',
@@ -597,7 +618,16 @@ const DashboardPage: NextPage = () => {
                         const newSales = { ...prev };
                         newSales.members = [
                           ...newSales.members,
-                          MEMBER_INIT_VALUE,
+                          {
+                            name: '',
+                            status: '出勤',
+                            fromHour: [...HOURS][0],
+                            fromMin: [...MINUTES][0],
+                            toHour: [...HOURS][0],
+                            toMin: [...MINUTES][0],
+                            hourly: [...HOURLY][0],
+                            amount: 0,
+                          },
                         ];
                         return newSales;
                       });
