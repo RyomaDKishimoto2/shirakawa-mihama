@@ -14,8 +14,10 @@ export const Download: FC = () => {
     router.query.month || now.getMonth() + 1
   ) as MonthType;
   const [selectedMonth, setMonth] = useState<MonthType>(thisMonth);
+  const [processing, setProcessing] = useState<boolean>(false);
 
   const onDownload = async () => {
+    setProcessing(true);
     const res = await axios.get('/keiri.xlsx', {
       responseType: 'arraybuffer',
     });
@@ -26,15 +28,15 @@ export const Download: FC = () => {
       year,
       month: selectedMonth,
     });
-    if (!sales.length) {
-      alert(`${selectedMonth}月の日報が存在しません`);
-      return;
-    }
     try {
+      if (!sales.length) {
+        throw new Error(`${selectedMonth}月の日報が存在しません`);
+      }
       const worksheet = workbook.getWorksheet('copy');
       let row = worksheet.getRow(3);
-      let iCount = 0;
+      let nameRow = worksheet.getRow(38);
       let total = 0;
+      let names = [''];
       for (const sale of sales) {
         // dayが存在しない時対応
         total = total + isNumber(sale.total);
@@ -63,7 +65,33 @@ export const Download: FC = () => {
         row.getCell(21).value = isNumber(sale.senbero); // せんべろ
         row.getCell(23).value = isNumber(sale.guests); // 総来客数
         row.getCell(24).value = sale.weather; // 天気
-        iCount += 1;
+        // 全スタッフ名を取得
+        names = Array.from(
+          new Set([...names, ...sale.members.map((mem) => mem.name)])
+        );
+      }
+      names.map((name, index) => {
+        const cellNumber = index + 2;
+        nameRow.getCell(cellNumber).value = name;
+      });
+      for (const sale of sales) {
+        // 40 D
+        sale.members.map((member) => {
+          nameRow.eachCell((cell, colNumber) => {
+            // 名前が入力されている行を参照
+            if (colNumber > 2 && colNumber < names.length + 2) {
+              const row = worksheet.getRow(sale.day + 38);
+              if (
+                cell.value &&
+                cell.value.toString() === member.name &&
+                member.status === '出勤'
+              ) {
+                // 取得した列番に、給料を挿入
+                row.getCell(colNumber).value = member.amount;
+              }
+            }
+          });
+        });
       }
       let averageForDay = worksheet.getRow(39);
       averageForDay.getCell(20).value = total / sales.length;
@@ -82,6 +110,8 @@ export const Download: FC = () => {
       }, 1000);
     } catch (e: any) {
       alert(`エラーが発生しました: ${e.message}`);
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -92,7 +122,7 @@ export const Download: FC = () => {
           value={selectedMonth}
           id='month'
           name='month'
-          className='h-full block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:max-w-xs sm:text-sm sm:leading-6 px-2'
+          className='h-full block rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:max-w-xs sm:text-sm sm:leading-6 px-2'
           onChange={(v) => {
             setMonth(Number(v.target.value) as MonthType);
           }}
@@ -105,14 +135,40 @@ export const Download: FC = () => {
             ) : null;
           })}
         </select>
-
-        <button
-          type='button'
-          onClick={onDownload}
-          className='rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ml-2'
-        >
-          download
-        </button>
+        {processing ? (
+          <button
+            disabled
+            type='button'
+            className='py-2.5 px-5 mx-2 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 inline-flex items-center'
+          >
+            <svg
+              aria-hidden='true'
+              role='status'
+              className='inline w-4 h-4 mr-3 text-gray-200 animate-spin dark:text-gray-600'
+              viewBox='0 0 100 101'
+              fill='none'
+              xmlns='http://www.w3.org/2000/svg'
+            >
+              <path
+                d='M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z'
+                fill='currentColor'
+              />
+              <path
+                d='M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z'
+                fill='#1C64F2'
+              />
+            </svg>
+            downloading...
+          </button>
+        ) : (
+          <button
+            type='button'
+            onClick={onDownload}
+            className='rounded-md bg-indigo-600  px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ml-2'
+          >
+            エクセルシート download
+          </button>
+        )}
       </div>
     </li>
   );
