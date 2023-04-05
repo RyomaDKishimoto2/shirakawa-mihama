@@ -27,7 +27,7 @@ export type MinuteType = typeof MINUTES[number];
 
 export const HOURLY = [900, 950, 1000, 1100, 1200, 1300, 1400, 1500] as const;
 export type HouryType = typeof HOURLY[number];
-export type AttendanceType = {
+export type MemberType = {
   name: string;
   status: StatusType;
   fromHour: HourType;
@@ -37,7 +37,7 @@ export type AttendanceType = {
   hourly: number;
   amount: number;
 };
-export const MEMBER_INIT_VALUE: AttendanceType = {
+export const MEMBER_INIT_VALUE: MemberType = {
   name: '',
   status: '出勤',
   fromHour: [...HOURS][0],
@@ -192,7 +192,7 @@ export type SalesType = {
   guests: number;
   senbero: number;
   changes: ChangeStateType;
-  members: AttendanceType[];
+  members: MemberType[];
   dayOfWeek: DayOfWeekType;
   suppliers: SupplierType;
   weather: WeatherType;

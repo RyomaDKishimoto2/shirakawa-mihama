@@ -23,6 +23,8 @@ import {
   MinuteType,
   STATUS,
   DaysType,
+  MemberType,
+  StatusType,
 } from '../../features/const';
 import { Select } from '../../components/Select';
 import useSWR from 'swr';
@@ -32,6 +34,7 @@ import { InputWithLabel } from '../../components/Input';
 import {
   calculateChange,
   calculateSalary,
+  createMembers,
   isGuestsEmpty,
   isMembersEmpty,
 } from '@/utils';
@@ -39,6 +42,8 @@ import { MonthlyTbody } from '../../components/Tbody';
 import { QuantityButton } from '../../components/QuantityButton';
 import { Thead } from '../../components/Thead';
 import { Loading } from '../../components/loading';
+import Link from 'next/link';
+import { MemberRepository } from '../../features/sales/Repositories';
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
@@ -55,7 +60,11 @@ const DashboardPage: NextPage = () => {
     0
   );
 
-  const { data } = useSWR(
+  const [members, setMembers] = useState<
+    { name: string; salary: HouryType; createdAt: Date }[]
+  >([{ name: '', salary: [...HOURLY][0], createdAt: new Date() }]);
+
+  const { data, mutate } = useSWR(
     year && month ? `/api/sales/${year}/${month}/${day}` : null,
     async () => {
       return await SaleRepository.getSales({ year, month });
@@ -70,13 +79,47 @@ const DashboardPage: NextPage = () => {
     }
   );
 
+  const { data: staff } = useSWR(
+    '/admin/members',
+    async () => {
+      return await MemberRepository.getMembers();
+    },
+    { refreshWhenHidden: false }
+  );
+
+  useEffect(() => {
+    if (!staff) {
+      return;
+    }
+    setMembers(staff);
+  }, [staff]);
+
+  useEffect(() => {
+    mutate();
+  }, [month]);
+
   useEffect(() => {
     const target = data?.find(
       (sale) => sale.year === year && sale.month === month && sale.day === day
     );
+    const MEMBERS = createMembers(target, members);
     const sale = target
-      ? ({ ...target, year, month, day, dayOfWeek } as SalesType)
-      : ({ ...SALE_INIT_VALUE, year, month, day, dayOfWeek } as SalesType);
+      ? ({
+          ...target,
+          year,
+          month,
+          day,
+          dayOfWeek,
+          members: MEMBERS,
+        } as SalesType)
+      : ({
+          ...SALE_INIT_VALUE,
+          year,
+          month,
+          day,
+          dayOfWeek,
+          members: MEMBERS,
+        } as SalesType);
 
     setSale(sale);
   }, [day]);
@@ -85,13 +128,26 @@ const DashboardPage: NextPage = () => {
     const target = data?.find(
       (sale) => sale.year === year && sale.month === month && sale.day === day
     );
-
+    const MEMBERS = createMembers(target, members);
     const sale = target
-      ? ({ ...target, year, month, day, dayOfWeek } as SalesType)
-      : ({ ...SALE_INIT_VALUE, year, month, day, dayOfWeek } as SalesType);
-
+      ? ({
+          ...target,
+          year,
+          month,
+          day,
+          dayOfWeek,
+          members: MEMBERS,
+        } as SalesType)
+      : ({
+          ...SALE_INIT_VALUE,
+          year,
+          month,
+          day,
+          dayOfWeek,
+          members: MEMBERS,
+        } as SalesType);
     setSale(sale);
-  }, []);
+  }, [data, members]);
 
   const onSubmit = async () => {
     setLoading(true);
@@ -99,12 +155,14 @@ const DashboardPage: NextPage = () => {
       if (isGuestsEmpty(sale)) {
         return alert('来客数が未入力です');
       }
-      if (isMembersEmpty(sale.members.filter((member) => member.name))) {
+      const onDutyMembers = (sale.members as MemberType[]).filter(
+        (member) => member.status === '出勤'
+      );
+      if (isMembersEmpty(onDutyMembers)) {
         return alert('出勤者が未入力です');
       }
-      const staffSalaries = sale.members.reduce(
-        (accum, item) => accum + item.amount,
-        0
+      const staffSalaries = Math.ceil(
+        onDutyMembers.reduce((accum, item) => accum + item.amount, 0)
       );
       const param = { ...sale, staffSalaries };
       await SaleRepository.create({ param });
@@ -116,9 +174,17 @@ const DashboardPage: NextPage = () => {
     }
   };
 
+  if (!staff) {
+    return (
+      <ProtectedRoute>
+        <Loading message={'読み込み中..'} />
+      </ProtectedRoute>
+    );
+  }
+
   return (
     <ProtectedRoute>
-      {loading && <Loading />}
+      {loading && <Loading message={'保存中..'} />}
       <div
         className={`isolate bg-white py-24 px-6 sm:py-32 lg:px-8 ${
           loading ? 'blur-sm' : ''
@@ -184,6 +250,17 @@ const DashboardPage: NextPage = () => {
               }}
             />
           </h2>
+          <h5 className='flex items-center mt-5 justify-center text-center text-xl tracking-tight sm:text-2xl text-gray-500'>
+            新しいスタッフがいる場合は日報を入力の前に、
+          </h5>
+          <h5 className='flex items-center mt-3 justify-center text-center text-lg tracking-tight text-gray-500 sm:text-2xl'>
+            <Link href='/members' legacyBehavior>
+              <a className='text-2xl leading-6 text-red-500'>
+                👉ここをクリック👈
+              </a>
+            </Link>
+            してスタッフを追加してください
+          </h5>
         </div>
         <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
           <table className='mt-16 w-full text-left shadow-md '>
@@ -420,41 +497,36 @@ const DashboardPage: NextPage = () => {
             </div>
           </div>
         </div>
-        <div className='mx-auto mt-9 max-w-3xl overflow-x-auto shadow-md sm:mt-20 sm:rounded-lg'>
+        <div className='mx-auto mt-9 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
           <table className='w-full text-left text-lg'>
             <Thead th={['名前', '勤怠', '勤務時間', '時給', '金額']} />
             <tbody>
-              {sale.members.map((attendance, attendanceIndex) => {
+              {sale.members.map((member) => {
                 return (
-                  <tr key={attendanceIndex} className='border-b'>
-                    <td className='py-4 px-5 text-lg w-1/5'>
-                      <input
-                        type='text'
-                        id={`name${attendanceIndex}`}
-                        className='block w-full rounded-lg border border-gray-300 px-2.5 py-1 text-lg text-gray-900 focus:border-blue-500 focus:ring-blue-500'
-                        value={attendance.name || ''}
-                        onChange={(e) => {
-                          setSale((prev) => {
-                            const newSales = { ...prev };
-                            newSales.members[attendanceIndex].name = e.target
-                              .value as string;
-                            return newSales;
-                          });
-                        }}
-                        required
-                      />
-                    </td>
+                  <tr key={member.name} className='border-b'>
+                    <td className='py-4 px-5 text-lg w-1/5'>{member.name}</td>
                     <td className='py-4'>
                       <Select
                         options={[...STATUS]}
                         htmlFor={'kintai'}
                         textSize={'text-lg'}
-                        value={attendance.status}
-                        onChange={() => {
+                        value={member.status}
+                        onChange={(e) => {
                           setSale((prev) => {
                             const newSales = { ...prev };
-                            newSales.members = newSales.members.filter(
-                              (_, index) => index !== attendanceIndex
+                            newSales.members = newSales.members.map((value) =>
+                              value.name === member.name
+                                ? {
+                                    ...value,
+                                    status: e.target.value as StatusType,
+                                    fromHour: [...HOURS][0],
+                                    fromMin: [...MINUTES][0],
+                                    toHour: [...HOURS][0],
+                                    toMin: [...MINUTES][0],
+                                    hourly: [...HOURLY][0],
+                                    amount: 0,
+                                  }
+                                : value
                             );
                             return newSales;
                           });
@@ -468,23 +540,33 @@ const DashboardPage: NextPage = () => {
                           htmlFor={'fromHours'}
                           textSize={'text-lg'}
                           name={'fromHours'}
-                          value={attendance.fromHour}
+                          value={member.fromHour}
                           onChange={(e) => {
                             const amount = calculateSalary({
                               fromHour: Number(e.target.value) as HourType,
-                              fromMin: attendance.fromMin,
-                              toHour: attendance.toMin,
-                              toMin: attendance.toMin,
-                              hourly: attendance.hourly,
+                              fromMin: member.fromMin,
+                              toHour: member.toMin,
+                              toMin: member.toMin,
+                              hourly: member.hourly,
                             });
+
                             setSale((prev) => {
                               const newSales = { ...prev };
-                              newSales.members[attendanceIndex].fromHour =
-                                Number(e.target.value) as HourType;
-                              newSales.members[attendanceIndex].amount = amount;
+                              newSales.members = newSales.members.map((value) =>
+                                value.name === member.name
+                                  ? {
+                                      ...value,
+                                      fromHour: Number(
+                                        e.target.value
+                                      ) as HourType,
+                                      amount: amount,
+                                    }
+                                  : value
+                              );
                               return newSales;
                             });
                           }}
+                          disabled={member.status === '休み'}
                         />
                         <span className='mx-1 text-xl'>:</span>
                         <Select
@@ -492,52 +574,70 @@ const DashboardPage: NextPage = () => {
                           htmlFor={'fromMin'}
                           textSize={'text-lg'}
                           name={'fromMin'}
-                          value={attendance.fromMin}
+                          value={member.fromMin}
                           onChange={(e) => {
                             const amount = calculateSalary({
-                              fromHour: attendance.fromHour,
+                              fromHour: member.fromHour,
                               fromMin: Number(e.target.value) as MinuteType,
-                              toHour: attendance.toHour,
-                              toMin: attendance.toMin,
-                              hourly: attendance.hourly,
+                              toHour: member.toHour,
+                              toMin: member.toMin,
+                              hourly: member.hourly,
                             });
+
                             setSale((prev) => {
                               const newSales = { ...prev };
-                              newSales.members[attendanceIndex].fromMin =
-                                Number(e.target.value) as MinuteType;
-                              newSales.members[attendanceIndex].amount = amount;
+                              newSales.members = newSales.members.map((value) =>
+                                value.name === member.name
+                                  ? {
+                                      ...value,
+                                      fromMin: Number(
+                                        e.target.value
+                                      ) as MinuteType,
+                                      amount: amount,
+                                    }
+                                  : value
+                              );
                               return newSales;
                             });
                           }}
+                          disabled={member.status === '休み'}
                         />
                         <span className='mx-1 text-xl'>~</span>
                         <Select
                           options={[
                             ...HOURS.filter((hour) => {
-                              return hour >= attendance.fromHour;
+                              return hour >= member.fromHour;
                             }),
                           ]}
                           htmlFor={'toHours'}
                           textSize={'text-lg'}
                           name={'toHours'}
-                          value={attendance.toHour}
+                          value={member.toHour}
                           onChange={(e) => {
                             const amount = calculateSalary({
-                              fromHour: attendance.fromHour,
-                              fromMin: attendance.fromMin,
+                              fromHour: member.fromHour,
+                              fromMin: member.fromMin,
                               toHour: Number(e.target.value) as HourType,
-                              toMin: attendance.toMin,
-                              hourly: attendance.hourly,
+                              toMin: member.toMin,
+                              hourly: member.hourly,
                             });
                             setSale((prev) => {
                               const newSales = { ...prev };
-                              newSales.members[attendanceIndex].toHour = Number(
-                                e.target.value
-                              ) as HourType;
-                              newSales.members[attendanceIndex].amount = amount;
+                              newSales.members = newSales.members.map((value) =>
+                                value.name === member.name
+                                  ? {
+                                      ...value,
+                                      toHour: Number(
+                                        e.target.value
+                                      ) as HourType,
+                                      amount: amount,
+                                    }
+                                  : value
+                              );
                               return newSales;
                             });
                           }}
+                          disabled={member.status === '休み'}
                         />
                         <span className='mx-1 text-xl'>:</span>
                         <Select
@@ -545,59 +645,43 @@ const DashboardPage: NextPage = () => {
                           htmlFor={'toMin'}
                           textSize={'text-lg'}
                           name={'toMin'}
-                          value={attendance.toMin}
+                          value={member.toMin}
                           onChange={(e) => {
                             const amount = calculateSalary({
-                              fromHour: attendance.fromHour,
-                              fromMin: attendance.fromMin,
-                              toHour: attendance.toHour,
+                              fromHour: member.fromHour,
+                              fromMin: member.fromMin,
+                              toHour: member.toHour,
                               toMin: Number(e.target.value) as MinuteType,
-                              hourly: attendance.hourly,
+                              hourly: member.hourly,
                             });
+
                             setSale((prev) => {
                               const newSales = { ...prev };
-                              newSales.members[attendanceIndex].toMin = Number(
-                                e.target.value
-                              ) as MinuteType;
-                              newSales.members[attendanceIndex].amount = amount;
+                              newSales.members = newSales.members.map((value) =>
+                                value.name === member.name
+                                  ? {
+                                      ...value,
+                                      toMin: Number(
+                                        e.target.value
+                                      ) as MinuteType,
+                                      amount: amount,
+                                    }
+                                  : value
+                              );
                               return newSales;
                             });
                           }}
+                          disabled={member.status === '休み'}
                         />
                       </div>
                     </td>
-                    <td className='py-4'>
-                      <Select
-                        options={[...HOURLY]}
-                        htmlFor={'hourly'}
-                        name={'hourly'}
-                        textSize={'text-lg'}
-                        value={attendance.hourly}
-                        onChange={(e) => {
-                          const amount = calculateSalary({
-                            fromHour: attendance.fromHour,
-                            fromMin: attendance.fromMin,
-                            toHour: attendance.toHour,
-                            toMin: attendance.toMin,
-                            hourly: Number(e.target.value) as HouryType,
-                          });
-                          setSale((prev) => {
-                            const newSales = { ...prev };
-                            newSales.members[attendanceIndex].hourly = Number(
-                              e.target.value
-                            ) as HouryType;
-                            newSales.members[attendanceIndex].amount = amount;
-                            return newSales;
-                          });
-                        }}
-                      />
-                    </td>
+                    <td className='py-4'>{member.hourly}</td>
                     <td
                       className={`px-4 py-4 text-lg ${
-                        attendance.amount < 0 ? 'text-red-700' : ''
+                        member.amount < 0 ? 'text-red-700' : ''
                       }`}
                     >
-                      {attendance.amount.toLocaleString('ja-JP', {
+                      {member.amount.toLocaleString('ja-JP', {
                         style: 'currency',
                         currency: 'JPY',
                       })}
@@ -605,38 +689,26 @@ const DashboardPage: NextPage = () => {
                   </tr>
                 );
               })}
-              <tr className='border-b'>
-                <td className='py-4 pl-5 text-lg'></td>
-                <td className='py-4'></td>
-                <td className='py-4'></td>
-                <td className='py-4'></td>
-                <td className='px-6 py-4 text-2xl'>
-                  <QuantityButton
-                    isAdd={true}
-                    onClick={() => {
-                      setSale((prev) => {
-                        const newSales = { ...prev };
-                        newSales.members = [
-                          ...newSales.members,
-                          {
-                            name: '',
-                            status: '出勤',
-                            fromHour: [...HOURS][0],
-                            fromMin: [...MINUTES][0],
-                            toHour: [...HOURS][0],
-                            toMin: [...MINUTES][0],
-                            hourly: [...HOURLY][0],
-                            amount: 0,
-                          },
-                        ];
-                        return newSales;
-                      });
-                    }}
-                  />
-                </td>
-              </tr>
             </tbody>
           </table>
+          <div className='mt-5 flex justify-end text-right'>
+            <div>
+              <label
+                htmlFor='total'
+                className='block leading-6 text-gray-400 text-xl'
+              >
+                お給料合計
+              </label>
+              <div className='mt-2.5 text-3xl'>
+                {sale.members
+                  .reduce((partialSum, a) => partialSum + a.amount, 0)
+                  .toLocaleString('ja-JP', {
+                    style: 'currency',
+                    currency: 'JPY',
+                  })}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className='mx-auto mt-16 max-w-3xl sm:mt-20'>

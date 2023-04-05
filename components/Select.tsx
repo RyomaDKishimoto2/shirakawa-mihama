@@ -8,6 +8,7 @@ type Props = {
   name?: string;
   value: string | number;
   onChange: React.ChangeEventHandler<HTMLSelectElement>;
+  disabled?: boolean;
 };
 
 export const Select: FC<Props> = ({
@@ -18,6 +19,7 @@ export const Select: FC<Props> = ({
   name,
   value,
   onChange,
+  disabled,
 }) => {
   return (
     <>
@@ -35,6 +37,7 @@ export const Select: FC<Props> = ({
         className={`block rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 ${textSize}`}
         value={value}
         onChange={onChange}
+        disabled={disabled}
       >
         {options.map((option) => (
           <option key={option} value={option}>

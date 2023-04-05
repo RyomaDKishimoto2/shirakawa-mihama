@@ -11,17 +11,17 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
   const menuItems = [
     {
       id: 1,
-      name: 'Home',
+      name: 'Top',
       link: '/',
     },
     {
       id: 2,
-      name: 'Login',
+      name: 'ログイン',
       link: '/login',
     },
     {
       id: 3,
-      name: 'Sign Up',
+      name: 'サインアップ',
       link: '/signup',
     },
   ];
@@ -34,6 +34,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
       console.log(error.message);
     }
   };
+
   return (
     <>
       <header className='flex flex-wrap container mx-auto max-w-full items-center p-6 justify-between bg-white shadow-md sticky top-0 z-50'>
@@ -62,18 +63,25 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                   {router.pathname !== '/dashboard' ? (
                     <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
                       <Link href='/dashboard' legacyBehavior>
-                        <a className='text-lg font-semibold leading-6 text-gray-900'>
+                        <a className='text-lg leading-6 text-gray-500'>
                           日報入力
                         </a>
                       </Link>
                     </li>
                   ) : null}
                   <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
+                    <Link href='/members' legacyBehavior>
+                      <a className='text-lg leading-6 text-gray-500'>
+                        スタッフ管理
+                      </a>
+                    </Link>
+                  </li>
+                  <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
                     <a
                       onClick={handleLogout}
-                      className='text-lg font-semibold leading-6 text-gray-900'
+                      className='text-lg leading-6 text-gray-500'
                     >
-                      Log out <span aria-hidden='true'>&rarr;</span>
+                      ログアウト <span aria-hidden='true'>&rarr;</span>
                     </a>
                   </li>
                 </>
