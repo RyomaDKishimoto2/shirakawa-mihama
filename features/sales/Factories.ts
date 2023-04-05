@@ -1,5 +1,6 @@
 import { SalesType } from '../const';
-import { Sales } from './Entities';
+import { Members, Sales } from './Entities';
+import { Member } from './Repositories';
 
 const createFromResponse = (responses: SalesType[]) => {
   return responses.map((res) => {
@@ -26,4 +27,14 @@ const createFromResponse = (responses: SalesType[]) => {
 
 export const SalesFactory = {
   createFromResponse,
+};
+
+const createFromMemberResponse = (response: Member[]) => {
+  return response.map((res) => {
+    return new Members(res.name, res.salary, res.createdAt);
+  });
+};
+
+export const MembersFactory = {
+  createFromMemberResponse,
 };

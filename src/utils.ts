@@ -1,4 +1,12 @@
-import { AttendanceType, ChangeLabelType, SalesType } from '../features/const';
+import {
+  MemberType,
+  ChangeLabelType,
+  SalesType,
+  HOURS,
+  MINUTES,
+} from '../features/const';
+import { Sales } from '../features/sales/Entities';
+import { Member } from '../features/sales/Repositories';
 
 export const isGuestsEmpty = (sales: SalesType): boolean => {
   return !sales.guests && (sales.cash || sales.card || sales.eMoney)
@@ -66,10 +74,53 @@ export const calculateSalary = ({
   return minResult < 0 ? hourSalary - min : hourSalary + min;
 };
 
-export const isMembersEmpty = (members: AttendanceType[]): boolean => {
+export const isMembersEmpty = (members: MemberType[]): boolean => {
   return !members.length ? true : false;
 };
 
 export const isNumber = (data: number | undefined) => {
   return !data ? 0 : data;
+};
+
+export const createMembers = (
+  sales: Sales | undefined,
+  INIT_MEMBERS: Member[]
+) => {
+  return sales
+    ? INIT_MEMBERS.map((mem) => {
+        const onDuty = sales.members.find((member) => member.name === mem.name);
+        return onDuty
+          ? {
+              name: onDuty.name,
+              status: onDuty.status,
+              fromHour: onDuty.fromHour,
+              fromMin: onDuty.fromMin,
+              toHour: onDuty.toHour,
+              toMin: onDuty.toMin,
+              hourly: onDuty.hourly,
+              amount: onDuty.amount,
+            }
+          : {
+              name: mem.name,
+              status: '休み',
+              fromHour: [...HOURS][0],
+              fromMin: [...MINUTES][0],
+              toHour: [...HOURS][0],
+              toMin: [...MINUTES][0],
+              hourly: mem.salary,
+              amount: 0,
+            };
+      })
+    : INIT_MEMBERS.map((mem) => {
+        return {
+          name: mem.name,
+          status: '休み',
+          fromHour: [...HOURS][0],
+          fromMin: [...MINUTES][0],
+          toHour: [...HOURS][0],
+          toMin: [...MINUTES][0],
+          hourly: mem.salary,
+          amount: 0,
+        };
+      });
 };

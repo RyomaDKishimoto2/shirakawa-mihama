@@ -1,25 +1,7 @@
-import axios from 'axios';
-import {
-  SupplierType,
-  ChangeStateType,
-  AttendanceType,
-  DayOfWeekType,
-  WeatherType,
-  MonthType,
-  YearType,
-  SalesType,
-} from '../const';
-import { SalesFactory } from './Factories';
-import {
-  doc,
-  setDoc,
-  serverTimestamp,
-  getDocs,
-  collection,
-  Firestore,
-} from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { MonthType, YearType, SalesType, HouryType } from '../const';
+import { MembersFactory, SalesFactory } from './Factories';
 import { createSale, readSales } from '@/lib/sales';
+import { createMember, readMembers } from '@/lib/member';
 
 type GetSalesInput = {
   year: YearType;
@@ -43,4 +25,29 @@ const create = async ({ param }: CreateSaleInput) => {
 export const SaleRepository = {
   getSales,
   create,
+};
+
+const getMembers = async () => {
+  const memberSnapshot = await readMembers();
+  if (memberSnapshot.exists()) {
+    return MembersFactory.createFromMemberResponse(
+      memberSnapshot.data().members
+    );
+  }
+  return null;
+};
+
+export type Member = {
+  name: string;
+  salary: HouryType;
+  createdAt: Date;
+};
+
+const createMembers = async (members: Member[]) => {
+  return await createMember(members);
+};
+
+export const MemberRepository = {
+  getMembers,
+  createMembers,
 };

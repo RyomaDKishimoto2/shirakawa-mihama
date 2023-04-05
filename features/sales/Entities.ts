@@ -1,9 +1,10 @@
 import {
   ChangeStateType,
-  AttendanceType,
+  MemberType,
   DayOfWeekType,
   WeatherType,
   SupplierType,
+  HouryType,
 } from '../const';
 
 export class Sales {
@@ -17,12 +18,20 @@ export class Sales {
     public guests: number,
     public senbero: number,
     public changes: ChangeStateType,
-    public members: AttendanceType[],
+    public members: MemberType[],
     public dayOfWeek: DayOfWeekType,
     public weather: WeatherType,
     public total: number,
     public impression: string,
     public suppliers: SupplierType,
     public staffSalaries: number
+  ) {}
+}
+
+export class Members {
+  constructor(
+    public name: string,
+    public salary: HouryType,
+    public createdAt: Date
   ) {}
 }
