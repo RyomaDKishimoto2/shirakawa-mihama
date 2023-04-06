@@ -5,10 +5,10 @@ type Props = {
   value: number;
   label: string;
   onChange(value: number): void;
-  labelSize?: 'text-sm' | 'text-2xl' | 'text-3xl' | 'text-lg';
+  labelSize?: 'text-sm' | 'text-2xl' | 'text-3xl' | 'text-lg' | 'text-xl';
   disabled?: boolean;
   invalid?: boolean;
-  InputSize?: 'text-sm' | 'text-2xl' | 'text-3xl' | 'text-lg';
+  InputSize?: 'text-sm' | 'text-2xl' | 'text-3xl' | 'text-lg' | 'text-xl';
 };
 
 export const InputWithLabel: FC<Props> = ({
