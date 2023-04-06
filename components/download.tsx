@@ -122,7 +122,7 @@ export const Download: FC = () => {
           value={selectedMonth}
           id='month'
           name='month'
-          className='h-full block rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:max-w-xs sm:text-sm sm:leading-6 px-2'
+          className='h-full block rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:max-w-xs text-lg sm:leading-6 px-2'
           onChange={(v) => {
             setMonth(Number(v.target.value) as MonthType);
           }}
@@ -139,7 +139,7 @@ export const Download: FC = () => {
           <button
             disabled
             type='button'
-            className='py-2.5 px-5 mx-2 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 inline-flex items-center'
+            className='py-2.5 px-5 mx-2 text-lg text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 inline-flex items-center'
           >
             <svg
               aria-hidden='true'
@@ -164,9 +164,9 @@ export const Download: FC = () => {
           <button
             type='button'
             onClick={onDownload}
-            className='rounded-md bg-indigo-600  px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ml-2'
+            className='rounded-md bg-indigo-600  px-5 py-2 text-lg text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ml-2'
           >
-            エクセルシート download
+            ダウンロード
           </button>
         )}
       </div>
