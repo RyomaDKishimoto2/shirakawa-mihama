@@ -8,6 +8,7 @@ import { HOURLY, HouryType } from '../../features/const';
 import { Member, MemberRepository } from '../../features/sales/Repositories';
 import useSWR from 'swr';
 import { useRouter } from 'next/router';
+import { SubmitButton } from '../../components/Submit';
 
 const MembersPage: NextPage = () => {
   const now = new Date();
@@ -18,7 +19,7 @@ const MembersPage: NextPage = () => {
     { name: '', salary: [...HOURLY][0], createdAt: new Date() },
   ]);
   const [newMember, setNewMember] = useState<Member | null>(null);
-  const { data: staff, mutate } = useSWR(
+  const { data: staff } = useSWR(
     '/admin/members',
     async () => {
       return await MemberRepository.getMembers();
@@ -91,7 +92,6 @@ const MembersPage: NextPage = () => {
           <div className='py-5 text-right'>
             <button
               type='button'
-              className='inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50'
               onClick={() => {
                 setNewMember({
                   name: '',
@@ -99,6 +99,7 @@ const MembersPage: NextPage = () => {
                   createdAt: new Date(),
                 });
               }}
+              className='text-gray-900 ring-1 ring-inset ring-gray-300  bg-white hover:text-white rounded-md px-4 py-3 text-lg font-medium'
             >
               スタッフを追加
             </button>
@@ -224,16 +225,8 @@ const MembersPage: NextPage = () => {
           </table>
         </div>
 
-        <div className='mx-auto mt-16 max-w-3xl sm:mt-20'>
-          <div className='mt-10'>
-            <button
-              type='button'
-              className='block w-full rounded-md bg-indigo-600 px-5 py-4 text-center font-noto text-xl text-white shadow-md hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-              onClick={onSubmit}
-            >
-              保存する
-            </button>
-          </div>
+        <div className='text-center mt-16'>
+          <SubmitButton title={'変更を保存する'} onSubmit={onSubmit} />
         </div>
       </div>
     </ProtectedRoute>

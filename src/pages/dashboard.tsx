@@ -44,6 +44,7 @@ import { Thead } from '../../components/Thead';
 import { Loading } from '../../components/loading';
 import Link from 'next/link';
 import { MemberRepository } from '../../features/sales/Repositories';
+import { SubmitButton } from '../../components/Submit';
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
@@ -186,27 +187,22 @@ const DashboardPage: NextPage = () => {
     <ProtectedRoute>
       {loading && <Loading message={'保存中..'} />}
       <div
-        className={`isolate bg-white py-24 px-6 sm:py-32 lg:px-8 ${
+        className={`isolate bg-white py-24 px-10 sm:py-32 lg:px-8 ${
           loading ? 'blur-sm' : ''
         }`}
       >
-        <div className='mx-auto max-w-3xl content-center'>
-          <h2 className='flex items-center justify-center text-center text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl'>
-            {/* <Select
-              options={[...YEARS]}
-              htmlFor={'year'}
-              textSize={'text-3xl'}
-              value={year}
-              onChange={(e) => {
-                router.replace({
-                  query: {
-                    ...router.query,
-                    year: e.target.value,
-                  },
-                });
-              }}
-            /> */}
-            {year}&nbsp;年
+        <div className='mx-auto max-w-3xl content-center text-center'>
+          <div className='mx-auto text-center w-3/4 relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20 mb-5'>
+            新しいスタッフがいる場合は日報を入力の前に、.{' '}
+            <Link href='/members' legacyBehavior>
+              <a className='font-semibold text-indigo-600'>
+                <span className='absolute inset-0' aria-hidden='true' />
+                ここから追加 <span aria-hidden='true'>&rarr;</span>
+              </a>
+            </Link>
+          </div>
+          <div className='flex items-center justify-center text-center'>
+            <h5 className='text-3xl'>{year}年</h5>
             <Select
               options={[...MONTHS]}
               htmlFor={'month'}
@@ -221,7 +217,7 @@ const DashboardPage: NextPage = () => {
                 });
               }}
             />
-            月
+            <h5 className='text-3xl'>月</h5>
             <Select
               options={[...DAYS]}
               htmlFor={'day'}
@@ -236,7 +232,7 @@ const DashboardPage: NextPage = () => {
                 });
               }}
             />
-            日（{dayOfWeek}）
+            <h5 className='text-3xl'>日（{dayOfWeek}）</h5>
             <Select
               options={[...WEATHERS]}
               htmlFor={'weather'}
@@ -249,34 +245,17 @@ const DashboardPage: NextPage = () => {
                 }));
               }}
             />
-          </h2>
-          <h5 className='flex items-center mt-5 justify-center text-center text-xl tracking-tight sm:text-2xl text-gray-500'>
-            新しいスタッフがいる場合は日報を入力の前に、
-          </h5>
-          <h5 className='flex items-center mt-3 justify-center text-center text-lg tracking-tight text-gray-500 sm:text-2xl'>
-            <Link href='/members' legacyBehavior>
-              <a className='text-2xl leading-6 text-red-500'>
-                👉ここをクリック👈
-              </a>
-            </Link>
-            してスタッフを追加してください
-          </h5>
+          </div>
         </div>
         <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
-          <table className='mt-16 w-full text-left shadow-md '>
-            <thead className='border-y text-lg text-gray-400'>
-              <tr>
-                <th scope='col' className='px-6 py-3'>
-                  {month}月の平均売上
-                </th>
-                <th scope='col' className='px-6 py-3'>
-                  {month}月{day}日の平均客単価
-                </th>
-                <th scope='col' className='px-6 py-3'>
-                  {month}月の売上累計
-                </th>
-              </tr>
-            </thead>
+          <table className='mt-16 w-full text-left shadow-md'>
+            <Thead
+              th={[
+                `${month}月の平均売上`,
+                `${month}月${day}日の平均客単価`,
+                `${month}月の売上累計`,
+              ]}
+            />
             <MonthlyTbody day={day} sale={sale} sales={data ? data : [sale]} />
           </table>
         </div>
@@ -286,7 +265,8 @@ const DashboardPage: NextPage = () => {
               name={'cash'}
               value={sale.cash}
               label={'現金'}
-              labelSize={'text-lg'}
+              labelSize='text-xl'
+              InputSize='text-xl'
               onChange={(value) => {
                 setSale((sale) => ({
                   ...sale,
@@ -299,7 +279,8 @@ const DashboardPage: NextPage = () => {
               name={'card'}
               value={sale.card}
               label={'カード'}
-              labelSize={'text-lg'}
+              labelSize='text-xl'
+              InputSize='text-xl'
               onChange={(value) => {
                 setSale((sale) => ({
                   ...sale,
@@ -312,7 +293,8 @@ const DashboardPage: NextPage = () => {
               name={'eMoney'}
               value={sale.eMoney}
               label={'電子マネー'}
-              labelSize={'text-lg'}
+              labelSize='text-xl'
+              InputSize='text-xl'
               onChange={(value) => {
                 setSale((sale) => ({
                   ...sale,
@@ -371,7 +353,8 @@ const DashboardPage: NextPage = () => {
                 <InputWithLabel
                   key={supplier}
                   name={supplier}
-                  labelSize={'text-lg'}
+                  labelSize='text-xl'
+                  InputSize='text-xl'
                   value={sale.suppliers[supplier]}
                   label={SUPPLIER_NAME[supplier]}
                   onChange={(value) => {
@@ -713,12 +696,7 @@ const DashboardPage: NextPage = () => {
 
         <div className='mx-auto mt-16 max-w-3xl sm:mt-20'>
           <div className='mt-10 sm:col-span-2'>
-            <label
-              htmlFor='message'
-              className='block text-lg  leading-6 text-gray-900'
-            >
-              所感
-            </label>
+            <h5 className='text-3xl text-gray-400'>所感</h5>
             <div className='mt-2.5'>
               <textarea
                 name='message'
@@ -736,14 +714,8 @@ const DashboardPage: NextPage = () => {
               />
             </div>
           </div>
-          <div className='mt-10'>
-            <button
-              type='button'
-              className='block w-full rounded-md bg-indigo-600 px-5 py-4 text-center font-noto text-xl text-white shadow-md hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-              onClick={onSubmit}
-            >
-              保存する
-            </button>
+          <div className='text-center mt-16'>
+            <SubmitButton title={'保存する'} onSubmit={onSubmit} />
           </div>
         </div>
       </div>
