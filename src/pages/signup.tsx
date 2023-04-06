@@ -55,13 +55,7 @@ const SignupPage: NextPage<{
 
   const token = liff?.getIDToken() || '';
   return (
-    <div className='sign-up-form container mx-auto w-96 mt-12 border-2 border-gray-400'>
-      <h2 className='px-12 mt-8 text-center text-2xl font-semibold text-blue-900'>
-        Sign Up
-      </h2>
-      <div className='px-12 mt-8 text-center text-lg font-semibold text-blue-900'>
-        <textarea name='' id='' cols={30} rows={10} value={token}></textarea>
-      </div>
+    <div className='sign-up-form container mx-auto w-96 mt-12  border-2'>
       <FormProvider {...methods}>
         <form
           action=''
@@ -70,9 +64,7 @@ const SignupPage: NextPage<{
         >
           <div className='mt-8'>
             <div className='flex items-center justify-between'>
-              <label htmlFor='' className='block mb-3 font-sans text-blue-900'>
-                Email
-              </label>
+              <label className='text-gray-600 mb-3 text-lg'>Email</label>
             </div>
 
             <input
@@ -86,9 +78,7 @@ const SignupPage: NextPage<{
           </div>
           <div className='mt-8'>
             <div className='flex items-center justify-between'>
-              <label htmlFor='' className='block mb-3 font-sans text-blue-900'>
-                Password
-              </label>
+              <label className='text-gray-600 mb-3 text-lg'>Password</label>
             </div>
 
             <input
@@ -102,7 +92,7 @@ const SignupPage: NextPage<{
           </div>
           <div className='mt-8'>
             <div className='flex items-center justify-between'>
-              <label htmlFor='' className='block mb-3 font-sans text-blue-900'>
+              <label className='text-gray-600 mb-3 text-lg'>
                 Confirm Password
               </label>
             </div>
@@ -121,7 +111,7 @@ const SignupPage: NextPage<{
           <div className='flex justify-center pt-8'>
             <button
               type='submit'
-              className={`h-12 text-center w-full bg-blue-900 border-2 rounded-md hover:shadow-lg hover:bg-blue-800 text-lg transition`}
+              className='bg-gray-900 w-full text-white rounded-md px-4 py-3 text-lg font-medium'
             >
               <p className='capitalize text-white font-normal'>
                 管理者として登録
@@ -133,7 +123,7 @@ const SignupPage: NextPage<{
             <button
               onClick={onSignUpByLine}
               type='button'
-              className={`h-12 text-center w-full bg-green-500 border-2 rounded-md hover:shadow-lg hover:bg-green-800 text-lg transition`}
+              className='bg-green-600 w-full text-white rounded-md px-4 py-3 text-lg font-medium'
             >
               <p className='capitalize text-white font-normal'>
                 スタッフとして登録

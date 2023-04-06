@@ -49,10 +49,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className='sign-up-form container mx-auto w-96 mt-12 border-2 border-gray-400'>
-      <h2 className='px-12 mt-8 text-center text-2xl font-semibold text-blue-900'>
-        Log In
-      </h2>
+    <div className='sign-up-form container mx-auto w-96 mt-12  border-2'>
       <FormProvider {...methods}>
         <form
           action=''
@@ -61,9 +58,7 @@ const LoginPage = () => {
         >
           <div className='mt-8'>
             <div className='flex items-center justify-between'>
-              <label htmlFor='' className='block mb-3 font-sans text-blue-900'>
-                Email
-              </label>
+              <label className='text-gray-600 mb-3 text-lg'>Email</label>
             </div>
 
             <input
@@ -77,9 +72,7 @@ const LoginPage = () => {
           </div>
           <div className='mt-8'>
             <div className='flex items-center justify-between'>
-              <label htmlFor='' className='block mb-3 font-sans text-blue-900'>
-                Password
-              </label>
+              <label className='text-gray-600 mb-3 text-lg'>Password</label>
             </div>
 
             <input
@@ -95,7 +88,7 @@ const LoginPage = () => {
           <div className='flex justify-center pt-8'>
             <button
               type='submit'
-              className={`h-12 text-center w-full bg-blue-900 border-2 rounded-md hover:shadow-lg hover:bg-blue-800 text-lg transition`}
+              className='bg-gray-900 w-full text-white rounded-md px-4 py-3 text-lg font-medium'
             >
               <p className='capitalize text-white font-normal'>
                 管理者としてログイン
@@ -107,7 +100,7 @@ const LoginPage = () => {
             <button
               onClick={onSignInByLine}
               type='button'
-              className={`h-12 text-center w-full bg-green-500 border-2 rounded-md hover:shadow-lg hover:bg-green-800 text-lg transition`}
+              className='bg-green-600 w-full text-white rounded-md px-4 py-3 text-lg font-medium'
             >
               <p className='capitalize text-white font-normal'>
                 スタッフとしてログイン
