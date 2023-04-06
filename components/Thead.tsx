@@ -10,7 +10,7 @@ export const Thead: FC<Props> = ({ th }) => {
       <tr>
         {th.map((t) => {
           return (
-            <th key={t} scope='col' className='px-6 py-3'>
+            <th key={t} scope='col' className='px-6 py-3 font-normal'>
               {t}
             </th>
           );
