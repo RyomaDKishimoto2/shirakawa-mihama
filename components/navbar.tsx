@@ -3,6 +3,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import { Download } from './download';
+import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Fragment } from 'react';
+
+const navigation = [
+  { name: '日報作成', href: '/dashboard', current: true },
+  { name: 'スタッフ管理', href: '/members', current: false },
+];
 
 const Navbar = ({ children }: { children: React.ReactNode }) => {
   const { user, logOut } = useAuth();
@@ -22,144 +30,129 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <div className='bg-white border-b-2'>
-        <div className='mx-auto max-w-7xl p-2 sm:px-6 lg:px-8'>
-          <div className='relative flex h-16 items-center justify-between'>
-            <div className='flex flex-1 items-center justify-center sm:items-stretch sm:justify-start'>
-              <div className='flex flex-shrink-0 items-center'>
-                <img
-                  className='block h-16 w-auto lg:hidden'
-                  src='/static/kamon.png'
-                  alt='Your Company'
-                />
-                <img
-                  className='hidden h-16 w-auto lg:block'
-                  src='/static/kamon.png'
-                  alt='SHIRAKAWA SHOTEN'
-                />
-                {user && user.role === RoleType.ADMIN && <Download />}
-              </div>
-              <div className='flex space-x-4 items-center'>
-                <>
-                  {!user || !user.userId ? (
-                    <Link href='/signup' legacyBehavior>
-                      <a
-                        className={classNames(
-                          router.asPath === '/signup'
-                            ? 'bg-gray-900 text-white'
-                            : 'text-gray-400 bg-slate-100 hover:text-white',
-                          'rounded-md px-4 py-3 text-lg font-medium'
-                        )}
-                      >
-                        サインアップ
-                      </a>
-                    </Link>
-                  ) : (
-                    <>
-                      <Link href='/dashboard' legacyBehavior>
-                        <a
-                          className={classNames(
-                            router.asPath === '/dashboard'
-                              ? 'bg-gray-900 text-white'
-                              : 'text-gray-400 bg-slate-100 hover:text-white',
-                            'rounded-md px-4 py-3 text-lg font-medium'
-                          )}
-                        >
-                          日報入力
-                        </a>
-                      </Link>
-                      <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
-                        <Link href='/members' legacyBehavior>
+      <Disclosure as='nav' className='bg-white border-b-2'>
+        {({ open }) => (
+          <>
+            <div className='mx-auto max-w-7xl px-2 sm:px-6 lg:px-8'>
+              <div className='relative flex h-16 items-center justify-between'>
+                <div className='absolute inset-y-0 left-0 flex items-center lg:hidden'>
+                  {/* Mobile menu button*/}
+                  <Disclosure.Button className='inline-flex items-center justify-center rounded-md p-2 text-gray-400  focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white'>
+                    <span className='sr-only'>Open main menu</span>
+                    {open ? (
+                      <XMarkIcon
+                        className='block h-6 w-6 mr-5'
+                        aria-hidden='true'
+                      />
+                    ) : (
+                      <Bars3Icon className='block h-6 w-6' aria-hidden='true' />
+                    )}
+                  </Disclosure.Button>
+                </div>
+                <div className='flex flex-1 items-center justify-center sm:justify-start'>
+                  <div className='flex flex-shrink-0 items-center'>
+                    {user && user.role === RoleType.ADMIN && <Download />}
+                  </div>
+                  <div className='hidden lg:block'>
+                    <div className='flex space-x-2'>
+                      {navigation.map((item) => (
+                        <Link key={item.name} href={item.href} legacyBehavior>
                           <a
                             className={classNames(
-                              router.asPath === '/members'
+                              router.asPath === item.href
                                 ? 'bg-gray-900 text-white'
                                 : 'text-gray-400 bg-slate-100 hover:text-white',
                               'rounded-md px-4 py-3 text-lg font-medium'
                             )}
+                            aria-current={item.current ? 'page' : undefined}
                           >
-                            スタッフ管理
+                            {item.name}
                           </a>
                         </Link>
-                      </li>
-                    </>
-                  )}
-                </>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className='absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0'>
+                  {/* Profile dropdown */}
+                  <Menu as='div' className='relative ml-3'>
+                    <div>
+                      <Menu.Button className='flex rounded-fulltext-sm '>
+                        <span className='sr-only'>Open user menu</span>
+                        <img
+                          className='h-16 w-auto rounded-full'
+                          src='/static/kamon.png'
+                          alt='Your Company'
+                        />
+                      </Menu.Button>
+                    </div>
+                    <Transition
+                      as={Fragment}
+                      enter='transition ease-out duration-100'
+                      enterFrom='transform opacity-0 scale-95'
+                      enterTo='transform opacity-100 scale-100'
+                      leave='transition ease-in duration-75'
+                      leaveFrom='transform opacity-100 scale-100'
+                      leaveTo='transform opacity-0 scale-95'
+                    >
+                      <Menu.Items className='absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                        <Menu.Item>
+                          {({ active }) =>
+                            user && user.userId ? (
+                              <Link href='/login' legacyBehavior>
+                                <a
+                                  onClick={handleLogout}
+                                  className={classNames(
+                                    active ? 'bg-gray-100' : '',
+                                    'block px-4 py-2 text-sm text-gray-700'
+                                  )}
+                                >
+                                  ログアウト
+                                </a>
+                              </Link>
+                            ) : (
+                              <a
+                                className={classNames(
+                                  active ? 'bg-gray-100' : '',
+                                  'block px-4 py-2 text-sm text-gray-700'
+                                )}
+                              >
+                                ログイン
+                              </a>
+                            )
+                          }
+                        </Menu.Item>
+                      </Menu.Items>
+                    </Transition>
+                  </Menu>
+                </div>
               </div>
             </div>
-            <div className='absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0'>
-              {router.asPath === '/signup' && (
-                <Link href='/login' legacyBehavior>
-                  <a className='text-gray-300  rounded-md px-3 py-2 text-lg font-medium'>
-                    ログイン <span aria-hidden='true'>&rarr;</span>
-                  </a>
-                </Link>
-              )}
-              {user && user.userId && (
-                <a
-                  onClick={handleLogout}
-                  className='text-gray-300  rounded-md px-3 py-2 text-lg font-medium'
-                >
-                  ログアウト <span aria-hidden='true'>&rarr;</span>
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* <header className='flex flex-wrap container mx-auto max-w-full items-center p-6 justify-between bg-white shadow-md sticky top-0 z-50'>
-        <div className='flex items-center text-blue-900 hover:text-blue-800 cursor-pointer transition duration-150 '>
-          {user && user.role === RoleType.ADMIN ? <Download /> : 'SHIRAKAWA'}
-        </div>
 
-        <nav className={`md:flex md:items-center font-title w-full md:w-auto`}>
-          <ul className='text-lg inline-block'>
-            <>
-              {!user || !user.userId ? (
-                menuItems.map((item) => (
-                  <li
-                    key={item.id}
-                    className='my-3 md:my-0 items-center mr-4 md:inline-block block '
+            <Disclosure.Panel className='lg:hidden'>
+              <div className='space-y-1 px-2 pb-3 pt-2'>
+                {navigation.map((item) => (
+                  <Disclosure.Button
+                    key={item.name}
+                    as='a'
+                    href={item.href}
+                    className={classNames(
+                      item.current
+                        ? 'bg-gray-900 text-white'
+                        : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                      'block rounded-md px-3 py-2 text-base font-medium'
+                    )}
+                    aria-current={item.current ? 'page' : undefined}
                   >
-                    <Link href={item?.link} legacyBehavior>
-                      <a className='text-blue-800 hover:text-blue-900 transition'>
-                        {item?.name}
-                      </a>
-                    </Link>
-                  </li>
-                ))
-              ) : (
-                <>
-                  {router.pathname !== '/dashboard' ? (
-                    <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
-                      <Link href='/dashboard' legacyBehavior>
-                        <a className='text-lg leading-6 text-gray-500'>
-                          日報入力
-                        </a>
-                      </Link>
-                    </li>
-                  ) : null}
-                  <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
-                    <Link href='/members' legacyBehavior>
-                      <a className='text-lg leading-6 text-gray-500'>
-                        スタッフ管理
-                      </a>
-                    </Link>
-                  </li>
-                  <li className='my-3 md:my-0 items-center mr-4 md:inline-block block '>
-                    <a
-                      onClick={handleLogout}
-                      className='text-lg leading-6 text-gray-500'
-                    >
-                      ログアウト <span aria-hidden='true'>&rarr;</span>
-                    </a>
-                  </li>
-                </>
-              )}
-            </>
-          </ul>
-        </nav>
-      </header> */}
+                    {item.name}
+                  </Disclosure.Button>
+                ))}
+              </div>
+            </Disclosure.Panel>
+          </>
+        )}
+      </Disclosure>
+
       {children}
     </>
   );
