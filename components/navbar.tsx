@@ -53,25 +53,27 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                   <div className='flex flex-shrink-0 items-center'>
                     {user && user.role === RoleType.ADMIN && <Download />}
                   </div>
-                  <div className='hidden lg:block'>
-                    <div className='flex space-x-2'>
-                      {navigation.map((item) => (
-                        <Link key={item.name} href={item.href} legacyBehavior>
-                          <a
-                            className={classNames(
-                              router.asPath === item.href
-                                ? 'bg-gray-900 text-white'
-                                : 'text-gray-400 bg-slate-100 hover:text-white',
-                              'rounded-md px-4 py-3 text-lg font-medium'
-                            )}
-                            aria-current={item.current ? 'page' : undefined}
-                          >
-                            {item.name}
-                          </a>
-                        </Link>
-                      ))}
+                  {user && user.userId && (
+                    <div className='hidden lg:block'>
+                      <div className='flex space-x-2'>
+                        {navigation.map((item) => (
+                          <Link key={item.name} href={item.href} legacyBehavior>
+                            <a
+                              className={classNames(
+                                router.asPath === item.href
+                                  ? 'bg-gray-900 text-white'
+                                  : 'text-gray-400 bg-slate-100 hover:text-white',
+                                'rounded-md px-4 py-3 text-lg font-medium'
+                              )}
+                              aria-current={item.current ? 'page' : undefined}
+                            >
+                              {item.name}
+                            </a>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
                 <div className='absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0'>
                   {/* Profile dropdown */}
@@ -99,26 +101,28 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                         <Menu.Item>
                           {({ active }) =>
                             user && user.userId ? (
-                              <Link href='/login' legacyBehavior>
-                                <a
-                                  onClick={handleLogout}
-                                  className={classNames(
-                                    active ? 'bg-gray-100' : '',
-                                    'block px-4 py-2 text-sm text-gray-700'
-                                  )}
-                                >
-                                  ログアウト
-                                </a>
-                              </Link>
-                            ) : (
                               <a
+                                onClick={handleLogout}
                                 className={classNames(
                                   active ? 'bg-gray-100' : '',
                                   'block px-4 py-2 text-sm text-gray-700'
                                 )}
                               >
-                                ログイン
+                                ログアウト
                               </a>
+                            ) : (
+                              <Link href='/login' legacyBehavior>
+                                <a
+                                  className={classNames(
+                                    router.asPath === '/login'
+                                      ? 'bg-gray-100'
+                                      : '',
+                                    'block px-4 py-2 text-sm text-gray-700'
+                                  )}
+                                >
+                                  ログイン
+                                </a>
+                              </Link>
                             )
                           }
                         </Menu.Item>
