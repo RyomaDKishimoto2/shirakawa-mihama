@@ -192,7 +192,7 @@ const DashboardPage: NextPage = () => {
         }`}
       >
         <div className='mx-auto max-w-3xl content-center text-center'>
-          <div className='mx-auto text-center w-3/4 relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20 mb-5'>
+          <div className='hidden md:block mx-auto text-center w-3/4 relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20 mb-5'>
             新しいスタッフがいる場合は日報を入力の前に、.{' '}
             <Link href='/members' legacyBehavior>
               <a className='font-semibold text-indigo-600'>
@@ -201,38 +201,44 @@ const DashboardPage: NextPage = () => {
               </a>
             </Link>
           </div>
-          <div className='flex items-center justify-center text-center'>
+          <div className='grid gap-2 grid-cols-1 md:grid-cols-5 items-center justify-center text-center'>
             <h5 className='text-3xl'>{year}年</h5>
-            <Select
-              options={[...MONTHS]}
-              htmlFor={'month'}
-              textSize={'text-3xl'}
-              value={month}
-              onChange={(e) => {
-                router.replace({
-                  query: {
-                    ...router.query,
-                    month: e.target.value,
-                  },
-                });
-              }}
-            />
-            <h5 className='text-3xl'>月</h5>
-            <Select
-              options={[...DAYS]}
-              htmlFor={'day'}
-              textSize={'text-3xl'}
-              value={day}
-              onChange={(e) => {
-                router.replace({
-                  query: {
-                    ...router.query,
-                    day: e.target.value,
-                  },
-                });
-              }}
-            />
-            <h5 className='text-3xl'>日（{dayOfWeek}）</h5>
+            <h5 className='text-3xl'>
+              <Select
+                options={[...MONTHS]}
+                htmlFor={'month'}
+                textSize={'text-3xl'}
+                value={month}
+                onChange={(e) => {
+                  router.replace({
+                    query: {
+                      ...router.query,
+                      month: e.target.value,
+                    },
+                  });
+                }}
+              />
+              月
+            </h5>
+
+            <h5 className='text-3xl'>
+              <Select
+                options={[...DAYS]}
+                htmlFor={'day'}
+                textSize={'text-3xl'}
+                value={day}
+                onChange={(e) => {
+                  router.replace({
+                    query: {
+                      ...router.query,
+                      day: e.target.value,
+                    },
+                  });
+                }}
+              />
+              日
+            </h5>
+            <h5 className='text-3xl'>（{dayOfWeek}）</h5>
             <Select
               options={[...WEATHERS]}
               htmlFor={'weather'}
@@ -487,7 +493,9 @@ const DashboardPage: NextPage = () => {
               {sale.members.map((member) => {
                 return (
                   <tr key={member.name} className='border-b'>
-                    <td className='py-4 px-5 text-lg w-1/5'>{member.name}</td>
+                    <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
+                      {member.name}
+                    </td>
                     <td className='py-4'>
                       <Select
                         options={[...STATUS]}
@@ -658,7 +666,7 @@ const DashboardPage: NextPage = () => {
                         />
                       </div>
                     </td>
-                    <td className='py-4'>{member.hourly}</td>
+                    <td className='p-4'>{member.hourly}</td>
                     <td
                       className={`px-4 py-4 text-lg ${
                         member.amount < 0 ? 'text-red-700' : ''
@@ -702,7 +710,7 @@ const DashboardPage: NextPage = () => {
                 name='message'
                 id='message'
                 rows={5}
-                className='block w-full rounded-md border-0 px-4 py-3 text-lg text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6'
+                className='block w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-lg text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6'
                 defaultValue={sale.impression}
                 onChange={(e) =>
                   setSale((sale) => ({

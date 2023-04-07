@@ -38,7 +38,7 @@ export const InputWithLabel: FC<Props> = ({
           pattern='\d*'
           name={name}
           id={name}
-          className={`block w-full rounded-md py-2 px-3.5 ${InputSize} leading-6 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ${
+          className={`border border-gray-300 bg-gray-50 w-full rounded-md py-2 px-3.5 ${InputSize} leading-6 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 ${
             invalid && 'border border-red-500'
           }`}
           value={value}

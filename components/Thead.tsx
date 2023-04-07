@@ -6,7 +6,7 @@ type Props = {
 
 export const Thead: FC<Props> = ({ th }) => {
   return (
-    <thead className='border-y text-lg text-gray-400'>
+    <thead className='border-y text-lg text-gray-400 whitespace-nowrap'>
       <tr>
         {th.map((t) => {
           return (
