@@ -29,7 +29,7 @@ const SignupPage: NextPage<{
       const userCredential = await signUp(data.email, data.password);
       await createUser({
         userId: userCredential.user.uid,
-        role: RoleType.ADMIN,
+        role: RoleType.USER, // RoleType.ADMIN
       });
       router.push('/dashboard');
     } catch (error: any) {
