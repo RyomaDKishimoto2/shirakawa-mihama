@@ -7,7 +7,6 @@ import {
   signInWithCustomToken,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import type { Liff } from '@line/liff';
 import { readUser, RoleType } from '@/lib/user';
 
 type UserType = {
@@ -15,45 +14,14 @@ type UserType = {
   role: RoleType | null;
 } | null;
 
-// liff関連のlocalStorageのキーのリストを取得
-const getLiffLocalStorageKeys = (prefix: string) => {
-  const keys = [];
-  for (var i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key?.indexOf(prefix) === 0) {
-      keys.push(key);
-    }
-  }
-  return keys;
-};
-// 期限切れのIDTokenをクリアする
-const clearExpiredIdToken = (liffId: string) => {
-  const keyPrefix = `LIFF_STORE:${liffId}:`;
-  const key = keyPrefix + 'decodedIDToken';
-  const decodedIDTokenString = localStorage.getItem(key);
-  if (!decodedIDTokenString) {
-    return;
-  }
-  const decodedIDToken = JSON.parse(decodedIDTokenString);
-  // 有効期限をチェック
-  if (new Date().getTime() > decodedIDToken.exp * 1000) {
-    const keys = getLiffLocalStorageKeys(keyPrefix);
-    keys.forEach(function (key) {
-      localStorage.removeItem(key);
-    });
-  }
-};
-
 const AuthContext = createContext({});
 
 export const useAuth = () => useContext<any>(AuthContext);
 
 export const AuthContextProvider = ({
   children,
-  liff,
 }: {
   children: React.ReactNode;
-  liff: Liff | null;
 }) => {
   const [user, setUser] = useState<UserType>();
   const [loading, setLoading] = useState<boolean>(true);
@@ -92,31 +60,8 @@ export const AuthContextProvider = ({
     await signOut(auth);
   };
 
-  const liffSignUp = async () => {
-    if (!liff || !liff.id) {
-      return;
-    }
-    clearExpiredIdToken(liff.id);
-    await liff.init({ liffId: liff.id });
-    try {
-      const result = await fetch('/api/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          idToken: liff.getIDToken(),
-        }),
-      });
-      const data = await result.json();
-      return await signInWithCustomToken(auth, data.token);
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
-  };
-
   return (
-    <AuthContext.Provider value={{ user, signUp, logIn, logOut, liffSignUp }}>
+    <AuthContext.Provider value={{ user, signUp, logIn, logOut }}>
       {loading ? null : children}
     </AuthContext.Provider>
   );

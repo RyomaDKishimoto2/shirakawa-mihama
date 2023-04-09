@@ -13,7 +13,7 @@ interface SignupType {
 }
 const SignupPage: NextPage = () => {
   const methods = useForm<SignupType>({ mode: 'onBlur' });
-  const { signUp, liffSignUp } = useAuth();
+  const { signUp } = useAuth();
   const router = useRouter();
   const {
     register,
@@ -34,19 +34,6 @@ const SignupPage: NextPage = () => {
         console.error(error);
       }
       console.error(error.message);
-    }
-  };
-
-  const onSignUpByLine = async () => {
-    try {
-      const userCredential = await liffSignUp();
-      await createUser({
-        userId: userCredential.user.uid,
-        role: RoleType.USER,
-      });
-      router.push('/dashboard');
-    } catch (error: any) {
-      alert(error.message);
     }
   };
 
@@ -109,21 +96,7 @@ const SignupPage: NextPage = () => {
               type='submit'
               className='bg-gray-900 w-full text-white rounded-md px-4 py-3 text-lg font-medium'
             >
-              <p className='capitalize text-white font-normal'>
-                管理者として登録
-              </p>
-            </button>
-          </div>
-          <hr className='h-px my-8 bg-gray-200 border-0 dark:bg-gray-700' />
-          <div className='flex justify-center'>
-            <button
-              onClick={onSignUpByLine}
-              type='button'
-              className='bg-green-600 w-full text-white rounded-md px-4 py-3 text-lg font-medium'
-            >
-              <p className='capitalize text-white font-normal'>
-                スタッフとして登録
-              </p>
+              <p className='capitalize text-white font-normal'>登録</p>
             </button>
           </div>
         </form>
