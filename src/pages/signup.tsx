@@ -3,7 +3,6 @@ import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useAuth } from '../../context/AuthContext';
 import type { NextPage } from 'next';
-import type { Liff } from '@line/liff';
 import { FirebaseError } from '@firebase/util';
 import { createUser, RoleType } from '@/lib/user';
 
@@ -12,9 +11,7 @@ interface SignupType {
   password: string;
   password_confirm: string;
 }
-const SignupPage: NextPage<{
-  liff: Liff | null;
-}> = ({ liff }) => {
+const SignupPage: NextPage = () => {
   const methods = useForm<SignupType>({ mode: 'onBlur' });
   const { signUp, liffSignUp } = useAuth();
   const router = useRouter();
@@ -53,7 +50,6 @@ const SignupPage: NextPage<{
     }
   };
 
-  const token = liff?.getIDToken() || '';
   return (
     <div className='sign-up-form container mx-auto w-96 mt-12  border-2'>
       <FormProvider {...methods}>
