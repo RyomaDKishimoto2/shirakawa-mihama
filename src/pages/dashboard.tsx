@@ -192,18 +192,44 @@ const DashboardPage: NextPage = () => {
         }`}
       >
         <div className='mx-auto max-w-3xl content-center text-center'>
-          <div className='hidden md:block mx-auto text-center w-3/4 relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20 mb-5'>
-            新しいスタッフがいる場合は日報を入力の前に、.{' '}
-            <Link href='/members' legacyBehavior>
-              <a className='font-semibold text-indigo-600'>
-                <span className='absolute inset-0' aria-hidden='true' />
-                ここから追加 <span aria-hidden='true'>&rarr;</span>
-              </a>
-            </Link>
+          <div className='block md:hidden'>
+            <div className='text-2xl'>
+              {year}年
+              <Select
+                options={[...MONTHS]}
+                htmlFor={'month'}
+                textSize={'text-lg'}
+                value={month}
+                onChange={(e) => {
+                  router.replace({
+                    query: {
+                      ...router.query,
+                      month: e.target.value,
+                    },
+                  });
+                }}
+              />
+              月
+              <Select
+                options={[...DAYS]}
+                htmlFor={'day'}
+                textSize={'text-lg'}
+                value={day}
+                onChange={(e) => {
+                  router.replace({
+                    query: {
+                      ...router.query,
+                      day: e.target.value,
+                    },
+                  });
+                }}
+              />
+              日({dayOfWeek}){sale.weather}
+            </div>
           </div>
-          <div className='grid gap-2 grid-cols-1 md:grid-cols-5 items-center justify-center text-center'>
-            <h5 className='text-3xl'>{year}年</h5>
-            <h5 className='text-3xl'>
+          <div className='grid gap-2 grid-cols-1 items-center justify-center text-center'>
+            <div className='text-3xl hidden md:block'>
+              {year}年
               <Select
                 options={[...MONTHS]}
                 htmlFor={'month'}
@@ -219,9 +245,6 @@ const DashboardPage: NextPage = () => {
                 }}
               />
               月
-            </h5>
-
-            <h5 className='text-3xl'>
               <Select
                 options={[...DAYS]}
                 htmlFor={'day'}
@@ -236,21 +259,20 @@ const DashboardPage: NextPage = () => {
                   });
                 }}
               />
-              日
-            </h5>
-            <h5 className='text-3xl'>（{dayOfWeek}）</h5>
-            <Select
-              options={[...WEATHERS]}
-              htmlFor={'weather'}
-              textSize={'text-3xl'}
-              value={sale.weather}
-              onChange={(e) => {
-                setSale((sale) => ({
-                  ...sale,
-                  weather: e.target.value as WeatherType,
-                }));
-              }}
-            />
+              日 ({dayOfWeek})
+              <Select
+                options={[...WEATHERS]}
+                htmlFor={'weather'}
+                textSize={'text-3xl'}
+                value={sale.weather}
+                onChange={(e) => {
+                  setSale((sale) => ({
+                    ...sale,
+                    weather: e.target.value as WeatherType,
+                  }));
+                }}
+              />
+            </div>
           </div>
         </div>
         <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
