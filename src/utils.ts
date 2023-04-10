@@ -124,3 +124,16 @@ export const createMembers = (
         };
       });
 };
+
+export const createPassword = () => {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+  const alphabetUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const numbers = '0123456789';
+  const passBase = alphabet + alphabetUpper + numbers;
+  const len = 8; // 8桁
+  let password = '';
+  for (var i = 0; i < len; i++) {
+    password += passBase.charAt(Math.floor(Math.random() * passBase.length));
+  }
+  return password;
+};
