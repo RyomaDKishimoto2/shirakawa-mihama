@@ -35,3 +35,14 @@ export class Members {
     public createdAt: Date
   ) {}
 }
+
+export class StaffInfo {
+  constructor(
+    public name: string,
+    public email: string,
+    public password: string,
+    public isDeleted: boolean,
+    public createdAt: Date,
+    public salary: HouryType
+  ) {}
+}

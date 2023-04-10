@@ -1,7 +1,14 @@
 import { MonthType, YearType, SalesType, HouryType } from '../const';
 import { MembersFactory, SalesFactory } from './Factories';
 import { createSale, readSales } from '@/lib/sales';
-import { createMember, readMembers } from '@/lib/member';
+import {
+  createMember,
+  createNewMember,
+  readMembers,
+  readMembersByAdmin,
+  deleteMember,
+  updateSalary,
+} from '@/lib/member';
 
 type GetSalesInput = {
   year: YearType;
@@ -43,11 +50,34 @@ export type Member = {
   createdAt: Date;
 };
 
+export type CreateMemberInput = {
+  name: string;
+  salary: HouryType;
+  createdAt: Date;
+  password: string;
+  email: string;
+  isDeleted: boolean;
+};
+
+const addNewMember = async (member: CreateMemberInput) => {
+  return await createNewMember(member);
+};
+
 const createMembers = async (members: Member[]) => {
   return await createMember(members);
 };
 
+const getStaffs = async () => {
+  const docs = await readMembersByAdmin();
+  const docsData = docs.docs.map((doc) => doc.data());
+  return MembersFactory.createFromStaffInfoResponse(docsData);
+};
+
 export const MemberRepository = {
   getMembers,
+  getStaffs,
   createMembers,
+  addNewMember,
+  deleteMember,
+  updateSalary,
 };

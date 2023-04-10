@@ -1,6 +1,6 @@
 import { SalesType } from '../const';
-import { Members, Sales } from './Entities';
-import { Member } from './Repositories';
+import { Members, Sales, StaffInfo } from './Entities';
+import { CreateMemberInput, Member } from './Repositories';
 
 const createFromResponse = (responses: SalesType[]) => {
   return responses.map((res) => {
@@ -35,6 +35,20 @@ const createFromMemberResponse = (response: Member[]) => {
   });
 };
 
+const createFromStaffInfoResponse = (response: CreateMemberInput[]) => {
+  return response.map((res) => {
+    return new StaffInfo(
+      res.name,
+      res.email,
+      res.password,
+      res.isDeleted,
+      res.createdAt,
+      res.salary
+    );
+  });
+};
+
 export const MembersFactory = {
   createFromMemberResponse,
+  createFromStaffInfoResponse,
 };
