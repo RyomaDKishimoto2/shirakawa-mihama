@@ -7,10 +7,7 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Fragment } from 'react';
 
-const navigation = [
-  { name: '日報作成', href: '/dashboard', current: true },
-  { name: 'スタッフ管理', href: '/members', current: false },
-];
+const navigation = [{ name: '日報作成', href: '/dashboard', current: true }];
 
 const Navbar = ({ children }: { children: React.ReactNode }) => {
   const { user, logOut } = useAuth();
@@ -60,12 +57,8 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                     {user && user.userId && (
                       <div className='hidden lg:block'>
                         <div className='flex space-x-2'>
-                          {navigation.map((item) => (
-                            <Link
-                              key={item.name}
-                              href={item.href}
-                              legacyBehavior
-                            >
+                          {navigation.map((item, index) => (
+                            <Link key={index} href={item.href} legacyBehavior>
                               <a
                                 className={classNames(
                                   router.asPath === item.href
@@ -79,6 +72,25 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                               </a>
                             </Link>
                           ))}
+                          {user && user.role === RoleType.ADMIN && (
+                            <Link href='/members' legacyBehavior>
+                              <a
+                                className={classNames(
+                                  router.asPath === '/members'
+                                    ? 'bg-gray-900 text-white'
+                                    : 'text-gray-400 bg-slate-100 hover:text-white',
+                                  'rounded-md px-4 py-3 text-lg font-medium'
+                                )}
+                                aria-current={
+                                  router.asPath === '/members'
+                                    ? 'page'
+                                    : undefined
+                                }
+                              >
+                                スタッフ管理
+                              </a>
+                            </Link>
+                          )}
                         </div>
                       </div>
                     )}
@@ -143,9 +155,9 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
 
               <Disclosure.Panel className='lg:hidden'>
                 <div className='space-y-1 px-2 pb-3 pt-2'>
-                  {navigation.map((item) => (
+                  {navigation.map((item, index) => (
                     <Disclosure.Button
-                      key={item.name}
+                      key={index}
                       as='a'
                       href={item.href}
                       className={classNames(
@@ -159,6 +171,23 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                       {item.name}
                     </Disclosure.Button>
                   ))}
+                  {user && user.role === RoleType.ADMIN && (
+                    <Disclosure.Button
+                      as='a'
+                      href='/members'
+                      className={classNames(
+                        router.asPath === '/members'
+                          ? 'bg-gray-900 text-white'
+                          : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                        'block rounded-md px-3 py-2 text-base font-medium'
+                      )}
+                      aria-current={
+                        router.asPath === '/members' ? 'page' : undefined
+                      }
+                    >
+                      スタッフ管理
+                    </Disclosure.Button>
+                  )}
                 </div>
               </Disclosure.Panel>
             </>
