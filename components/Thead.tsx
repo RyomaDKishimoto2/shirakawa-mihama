@@ -8,9 +8,9 @@ export const Thead: FC<Props> = ({ th }) => {
   return (
     <thead className='border-y text-lg text-gray-400 whitespace-nowrap'>
       <tr>
-        {th.map((t) => {
+        {th.map((t, index) => {
           return (
-            <th key={t} scope='col' className='px-6 py-3 font-normal'>
+            <th key={index} scope='col' className='px-6 py-3 font-normal'>
               {t}
             </th>
           );
