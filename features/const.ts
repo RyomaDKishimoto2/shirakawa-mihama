@@ -119,6 +119,7 @@ export const SUPPLIERS = [
   'yachin',
   'kounetuhi',
   'tushinhi',
+  'suehiro',
 ] as const;
 export type SupplierLabelType = typeof SUPPLIERS[number];
 
@@ -140,6 +141,7 @@ export const SUPPLIER_NAME = {
   yachin: '家賃',
   kounetuhi: '水道光熱費',
   tushinhi: '通信費',
+  suehiro: '末広商店',
 } as const;
 
 export const SUPPLIER_INIT_VALUES = {
@@ -160,6 +162,7 @@ export const SUPPLIER_INIT_VALUES = {
   yachin: 0,
   kounetuhi: 0,
   tushinhi: 0,
+  suehiro: 0,
 };
 
 export type SupplierType = {
@@ -180,6 +183,7 @@ export type SupplierType = {
   yachin: number;
   kounetuhi: number;
   tushinhi: number;
+  suehiro: number;
 };
 
 export type SalesType = {
