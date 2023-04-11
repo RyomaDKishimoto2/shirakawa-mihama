@@ -6,6 +6,7 @@ import axios from 'axios';
 import { SaleRepository } from '../features/sales/Repositories';
 import { isNumber } from '@/utils';
 import { useAuth } from '../context/AuthContext';
+import { RoleType } from '@/lib/user';
 
 export const Download: FC = () => {
   const router = useRouter();
@@ -19,7 +20,7 @@ export const Download: FC = () => {
   const [processing, setProcessing] = useState<boolean>(false);
 
   const onDownload = async () => {
-    if (user.role !== 'ADMIN') {
+    if (user.role !== RoleType.ADMIN) {
       alert('管理者のみ実行可能機能！');
     }
     setProcessing(true);
@@ -70,7 +71,7 @@ export const Download: FC = () => {
         row.getCell(21).value = isNumber(sale.senbero); // せんべろ
         row.getCell(23).value = isNumber(sale.guests); // 総来客数
         row.getCell(24).value = sale.weather; // 天気
-        // 全スタッフ名を取得
+        // 任意日にちに出勤したアルバイト名を取得
         names = Array.from(
           new Set([...names, ...sale.members.map((mem) => mem.name)])
         );
