@@ -84,42 +84,30 @@ export const isNumber = (data: number | undefined) => {
 
 export const createMembers = (
   sales: Sales | undefined,
-  INIT_MEMBERS: Member[]
+  initMembers: Member[]
 ) => {
   return sales
-    ? INIT_MEMBERS.map((mem) => {
-        const onDuty = sales.members.find((member) => member.name === mem.name);
-        return onDuty
-          ? {
-              name: onDuty.name,
-              status: onDuty.status,
-              fromHour: onDuty.fromHour,
-              fromMin: onDuty.fromMin,
-              toHour: onDuty.toHour,
-              toMin: onDuty.toMin,
-              hourly: onDuty.hourly,
-              amount: onDuty.amount,
-            }
-          : {
-              name: mem.name,
-              status: '休み',
-              fromHour: [...HOURS][0],
-              fromMin: [...MINUTES][0],
-              toHour: [...HOURS][0],
-              toMin: [...MINUTES][0],
-              hourly: mem.salary,
-              amount: 0,
-            };
-      })
-    : INIT_MEMBERS.map((mem) => {
+    ? sales.members.map((member) => {
         return {
-          name: mem.name,
+          name: member.name,
+          status: member.status,
+          fromHour: member.fromHour,
+          fromMin: member.fromMin,
+          toHour: member.toHour,
+          toMin: member.toMin,
+          hourly: member.hourly,
+          amount: member.amount,
+        };
+      })
+    : initMembers.map((member) => {
+        return {
+          name: member.name,
           status: '休み',
           fromHour: [...HOURS][0],
           fromMin: [...MINUTES][0],
           toHour: [...HOURS][0],
           toMin: [...MINUTES][0],
-          hourly: mem.salary,
+          hourly: member.salary,
           amount: 0,
         };
       });
