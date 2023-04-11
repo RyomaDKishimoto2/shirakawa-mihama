@@ -42,7 +42,6 @@ import { MonthlyTbody } from '../../components/Tbody';
 import { QuantityButton } from '../../components/QuantityButton';
 import { Thead } from '../../components/Thead';
 import { Loading } from '../../components/loading';
-import Link from 'next/link';
 import { MemberRepository } from '../../features/sales/Repositories';
 import { SubmitButton } from '../../components/Submit';
 
