@@ -2,24 +2,24 @@ import { db } from '../../config/firebase';
 import {
   doc,
   setDoc,
-  getDoc,
   getDocs,
   updateDoc,
+  deleteDoc,
   collection,
-  DocumentReference,
   CollectionReference,
 } from 'firebase/firestore';
 import { CreateMemberInput, Member } from '../../features/sales/Repositories';
 import { HouryType } from '../../features/const';
 
-const FILED_NAME = 'staff';
 const INFO_FILED_NAME = 'STAFF_INFO';
+const MINIMAM_INFO_FILED_NAME = 'STAFF_MINIMAM_INFO';
 
 export const readMembers = async () => {
-  const ref = doc(db, 'staff/member') as DocumentReference<{
-    members: Member[];
-  }>;
-  return await getDoc(ref);
+  const col = collection(
+    db,
+    MINIMAM_INFO_FILED_NAME
+  ) as CollectionReference<Member>;
+  return await getDocs(col);
 };
 
 export const readMembersByAdmin = async () => {
@@ -31,23 +31,34 @@ export const readMembersByAdmin = async () => {
 };
 
 export const createNewMember = async (param: CreateMemberInput) => {
-  const newMemberRef = doc(collection(db, INFO_FILED_NAME), `${param.name}`);
-  return await setDoc(newMemberRef, param);
-};
-
-export const createMember = async (members: Member[]) => {
-  const newMemberRef = doc(collection(db, FILED_NAME), 'member');
-  return await setDoc(newMemberRef, {
-    members: members,
+  const staffInfoRef = doc(collection(db, INFO_FILED_NAME), `${param.name}`);
+  const staffMinimamInfoRef = doc(
+    collection(db, MINIMAM_INFO_FILED_NAME),
+    `${param.name}`
+  );
+  await setDoc(staffMinimamInfoRef, {
+    name: param.name,
+    createdAt: param.createdAt,
+    salary: param.salary,
   });
+  await setDoc(staffInfoRef, param);
+  return;
 };
 
 export const deleteMember = async (name: string) => {
-  const newSalesRef = doc(collection(db, INFO_FILED_NAME), `${name}`);
-  return await updateDoc(newSalesRef, { isDeleted: true });
+  const ref = doc(collection(db, INFO_FILED_NAME), `${name}`);
+  const memberRef = doc(collection(db, MINIMAM_INFO_FILED_NAME), `${name}`);
+  await updateDoc(ref, { isDeleted: true });
+  await deleteDoc(memberRef);
 };
 
 export const updateSalary = async (name: string, salary: HouryType) => {
   const newSalesRef = doc(collection(db, INFO_FILED_NAME), `${name}`);
-  return await updateDoc(newSalesRef, { salary: salary });
+  const staffMinimamInfoRef = doc(
+    collection(db, MINIMAM_INFO_FILED_NAME),
+    `${name}`
+  );
+  await updateDoc(staffMinimamInfoRef, { salary: salary });
+  await updateDoc(newSalesRef, { salary: salary });
+  return;
 };

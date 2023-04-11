@@ -56,6 +56,7 @@ const MembersPage: NextPage = () => {
     }
     setLoading(true);
     try {
+      // STAFF_INFO & STAFF_MINIMAM_INFO & users作成処理
       await MemberRepository.addNewMember(newWorker);
       const userCredential = await signUp(newWorker.email, newWorker.password);
       await createUser({
@@ -101,7 +102,7 @@ const MembersPage: NextPage = () => {
     }
   };
 
-  if (!staff) {
+  if (!staff || !user) {
     return (
       <ProtectedRoute>
         <Loading message={'読み込み中..'} />

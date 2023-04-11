@@ -2,7 +2,6 @@ import { MonthType, YearType, SalesType, HouryType } from '../const';
 import { MembersFactory, SalesFactory } from './Factories';
 import { createSale, readSales } from '@/lib/sales';
 import {
-  createMember,
   createNewMember,
   readMembers,
   readMembersByAdmin,
@@ -35,13 +34,9 @@ export const SaleRepository = {
 };
 
 const getMembers = async () => {
-  const memberSnapshot = await readMembers();
-  if (memberSnapshot.exists()) {
-    return MembersFactory.createFromMemberResponse(
-      memberSnapshot.data().members
-    );
-  }
-  return null;
+  const docs = await readMembers();
+  const docsData = docs.docs.map((doc) => doc.data());
+  return MembersFactory.createFromMemberResponse(docsData);
 };
 
 export type Member = {
@@ -63,10 +58,6 @@ const addNewMember = async (member: CreateMemberInput) => {
   return await createNewMember(member);
 };
 
-const createMembers = async (members: Member[]) => {
-  return await createMember(members);
-};
-
 const getStaffs = async () => {
   const docs = await readMembersByAdmin();
   const docsData = docs.docs.map((doc) => doc.data());
@@ -76,7 +67,6 @@ const getStaffs = async () => {
 export const MemberRepository = {
   getMembers,
   getStaffs,
-  createMembers,
   addNewMember,
   deleteMember,
   updateSalary,
