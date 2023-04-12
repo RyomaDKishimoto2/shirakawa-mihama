@@ -44,6 +44,7 @@ import { Thead } from '../../components/Thead';
 import { Loading } from '../../components/loading';
 import { MemberRepository } from '../../features/sales/Repositories';
 import { SubmitButton } from '../../components/Submit';
+import Datepicker from 'react-tailwindcss-datepicker';
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
@@ -59,6 +60,15 @@ const DashboardPage: NextPage = () => {
     (partialSum, a) => partialSum + a,
     0
   );
+  const [value, setValue] = useState({
+    startDate: null,
+    endDate: null,
+  });
+
+  const handleValueChange = (newValue: any) => {
+    console.log('newValue:', newValue);
+    setValue(newValue);
+  };
 
   const [members, setMembers] = useState<
     { name: string; salary: HouryType; createdAt: Date }[]
@@ -191,6 +201,11 @@ const DashboardPage: NextPage = () => {
         }`}
       >
         <div className='mx-auto max-w-3xl content-center text-center'>
+          <Datepicker
+            asSingle={true}
+            value={value}
+            onChange={handleValueChange}
+          />
           <div className='block md:hidden'>
             <div className='text-2xl'>
               {year}年
@@ -519,7 +534,7 @@ const DashboardPage: NextPage = () => {
                     </td>
                     <td className='py-4'>
                       <Select
-                        options={[...STATUS]}
+                        options={Object.values(STATUS).map((st) => st)}
                         htmlFor={'kintai'}
                         textSize={'text-lg'}
                         value={member.status}
@@ -531,6 +546,30 @@ const DashboardPage: NextPage = () => {
                                 ? {
                                     ...value,
                                     status: e.target.value as StatusType,
+                                    fromHour:
+                                      e.target.value === STATUS.working
+                                        ? value.fromHour
+                                        : [...HOURS][0],
+                                    fromMin:
+                                      e.target.value === STATUS.working
+                                        ? value.fromMin
+                                        : [...MINUTES][0],
+                                    toHour:
+                                      e.target.value === STATUS.working
+                                        ? value.toHour
+                                        : [...HOURS][0],
+                                    toMin:
+                                      e.target.value === STATUS.working
+                                        ? value.toMin
+                                        : [...MINUTES][0],
+                                    hourly:
+                                      e.target.value === STATUS.working
+                                        ? value.hourly
+                                        : [...HOURLY][0],
+                                    amount:
+                                      e.target.value === STATUS.working
+                                        ? value.amount
+                                        : 0,
                                   }
                                 : value
                             );
@@ -551,7 +590,7 @@ const DashboardPage: NextPage = () => {
                             const amount = calculateSalary({
                               fromHour: Number(e.target.value) as HourType,
                               fromMin: member.fromMin,
-                              toHour: member.toMin,
+                              toHour: member.toHour,
                               toMin: member.toMin,
                               hourly: member.hourly,
                             });
@@ -565,7 +604,7 @@ const DashboardPage: NextPage = () => {
                                       fromHour: Number(
                                         e.target.value
                                       ) as HourType,
-                                      amount: amount,
+                                      amount: amount <= 0 ? 0 : amount,
                                     }
                                   : value
                               );
@@ -599,7 +638,7 @@ const DashboardPage: NextPage = () => {
                                       fromMin: Number(
                                         e.target.value
                                       ) as MinuteType,
-                                      amount: amount,
+                                      amount: amount <= 0 ? 0 : amount,
                                     }
                                   : value
                               );
@@ -636,7 +675,7 @@ const DashboardPage: NextPage = () => {
                                       toHour: Number(
                                         e.target.value
                                       ) as HourType,
-                                      amount: amount,
+                                      amount: amount <= 0 ? 0 : amount,
                                     }
                                   : value
                               );
@@ -670,7 +709,7 @@ const DashboardPage: NextPage = () => {
                                       toMin: Number(
                                         e.target.value
                                       ) as MinuteType,
-                                      amount: amount,
+                                      amount: amount <= 0 ? 0 : amount,
                                     }
                                   : value
                               );

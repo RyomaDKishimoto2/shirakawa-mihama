@@ -25,7 +25,7 @@ export const InputWithLabel: FC<Props> = ({
     <div>
       <label
         htmlFor={name}
-        className={`block   leading-6 text-gray-400 ${labelSize} ${
+        className={`block leading-6 text-gray-400 ${labelSize} ${
           invalid && 'text-red-700'
         }`}
       >

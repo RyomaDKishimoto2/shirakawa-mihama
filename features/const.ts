@@ -16,8 +16,8 @@ export const WEATHERS = [
 ] as const;
 export type WeatherType = typeof WEATHERS[number];
 
-export const STATUS = ['休み', '出勤'] as const;
-export type StatusType = typeof STATUS[number];
+export const STATUS = { offWork: '休み', working: '出勤' } as const;
+export type StatusType = typeof STATUS[keyof typeof STATUS];
 
 export const HOURS = [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25] as const;
 export type HourType = typeof HOURS[number];
@@ -102,6 +102,7 @@ export type ChangeStateType = {
 };
 
 export const SUPPLIERS = [
+  'suehiro',
   'sakihama',
   'miyazato',
   'ganaha',
@@ -119,11 +120,11 @@ export const SUPPLIERS = [
   'yachin',
   'kounetuhi',
   'tushinhi',
-  'suehiro',
 ] as const;
 export type SupplierLabelType = typeof SUPPLIERS[number];
 
 export const SUPPLIER_NAME = {
+  suehiro: '末広商店',
   sakihama: '崎浜商店',
   miyazato: '宮里洋酒店',
   ganaha: 'ガナハミート',
@@ -141,10 +142,10 @@ export const SUPPLIER_NAME = {
   yachin: '家賃',
   kounetuhi: '水道光熱費',
   tushinhi: '通信費',
-  suehiro: '末広商店',
 } as const;
 
 export const SUPPLIER_INIT_VALUES = {
+  suehiro: 0,
   sakihama: 0,
   miyazato: 0,
   ganaha: 0,
@@ -162,10 +163,10 @@ export const SUPPLIER_INIT_VALUES = {
   yachin: 0,
   kounetuhi: 0,
   tushinhi: 0,
-  suehiro: 0,
 };
 
 export type SupplierType = {
+  suehiro: number;
   sakihama: number;
   miyazato: number;
   ganaha: number;
@@ -183,7 +184,6 @@ export type SupplierType = {
   yachin: number;
   kounetuhi: number;
   tushinhi: number;
-  suehiro: number;
 };
 
 export type SalesType = {
