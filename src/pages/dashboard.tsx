@@ -531,12 +531,6 @@ const DashboardPage: NextPage = () => {
                                 ? {
                                     ...value,
                                     status: e.target.value as StatusType,
-                                    fromHour: [...HOURS][0],
-                                    fromMin: [...MINUTES][0],
-                                    toHour: [...HOURS][0],
-                                    toMin: [...MINUTES][0],
-                                    hourly: [...HOURLY][0],
-                                    amount: 0,
                                   }
                                 : value
                             );
