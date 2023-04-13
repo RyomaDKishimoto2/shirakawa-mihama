@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import type { NextPage } from 'next';
 import { FirebaseError } from '@firebase/util';
 import { createUser, RoleType } from '@/lib/user';
+import { Loading } from '../../components/loading';
 
 interface SignupType {
   email: string;
@@ -13,7 +14,7 @@ interface SignupType {
 }
 const SignupPage: NextPage = () => {
   const methods = useForm<SignupType>({ mode: 'onBlur' });
-  const { signUp } = useAuth();
+  const { signUp, user } = useAuth();
   const router = useRouter();
   const {
     register,
@@ -36,6 +37,14 @@ const SignupPage: NextPage = () => {
       console.error(error.message);
     }
   };
+
+  if (!user) {
+    return <Loading message={'更新中..'} />;
+  }
+
+  if (user && user.role !== RoleType.ADMIN) {
+    router.push('/login');
+  }
 
   return (
     <div className='sign-up-form container mx-auto w-96 mt-12  border-2'>
