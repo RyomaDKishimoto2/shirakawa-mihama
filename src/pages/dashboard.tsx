@@ -750,7 +750,7 @@ const DashboardPage: NextPage = () => {
                 id='message'
                 rows={5}
                 className='block w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-lg text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6'
-                defaultValue={sale.impression || ''}
+                value={sale.impression || ''}
                 onChange={(e) =>
                   setSale((sale) => ({
                     ...sale,
