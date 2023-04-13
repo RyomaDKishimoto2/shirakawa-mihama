@@ -17,7 +17,8 @@ export const MonthlyTbody: FC<Props> = ({ day, sale, sales }) => {
     ? firstDaySale
     : (MTDS + todaySale) / (MTD.length + 1); // 月の1日あたりの平均売上
   const monthlyTotal = firstDaySale ? firstDaySale : MTDS + todaySale; // 当月売上合計
-
+  const totalGuests =
+    sales.reduce((accum, sale) => accum + sale.guests, 0) + sale.guests;
   return (
     <tbody>
       <tr className='border-b hover:bg-gray-50'>
@@ -39,6 +40,7 @@ export const MonthlyTbody: FC<Props> = ({ day, sale, sales }) => {
             currency: 'JPY',
           })}
         </td>
+        <td className='px-6 py-4 text-2xl'>{totalGuests}人</td>
       </tr>
     </tbody>
   );

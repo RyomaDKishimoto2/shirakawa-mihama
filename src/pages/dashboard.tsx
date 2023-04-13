@@ -281,6 +281,7 @@ const DashboardPage: NextPage = () => {
                 `${month}月の平均売上`,
                 `${month}月${day}日の平均客単価`,
                 `${month}月の売上累計`,
+                `${month}月の来客数累計`,
               ]}
             />
             <MonthlyTbody day={day} sale={sale} sales={data ? data : [sale]} />
