@@ -44,7 +44,6 @@ import { Thead } from '../../components/Thead';
 import { Loading } from '../../components/loading';
 import { MemberRepository } from '../../features/sales/Repositories';
 import { SubmitButton } from '../../components/Submit';
-import Datepicker from 'react-tailwindcss-datepicker';
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
@@ -60,15 +59,6 @@ const DashboardPage: NextPage = () => {
     (partialSum, a) => partialSum + a,
     0
   );
-  const [value, setValue] = useState({
-    startDate: null,
-    endDate: null,
-  });
-
-  const handleValueChange = (newValue: any) => {
-    console.log('newValue:', newValue);
-    setValue(newValue);
-  };
 
   const [members, setMembers] = useState<
     { name: string; salary: HouryType; createdAt: Date }[]
@@ -201,11 +191,6 @@ const DashboardPage: NextPage = () => {
         }`}
       >
         <div className='mx-auto max-w-3xl content-center text-center'>
-          <Datepicker
-            asSingle={true}
-            value={value}
-            onChange={handleValueChange}
-          />
           <div className='block md:hidden'>
             <div className='text-2xl'>
               {year}年

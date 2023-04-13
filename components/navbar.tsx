@@ -61,7 +61,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                             <Link key={index} href={item.href} legacyBehavior>
                               <a
                                 className={classNames(
-                                  router.asPath === item.href
+                                  router.asPath.indexOf(item.href) != -1
                                     ? 'bg-gray-900 text-white'
                                     : 'text-gray-400 bg-slate-100 hover:text-white',
                                   'rounded-md px-4 py-3 text-lg font-medium'
