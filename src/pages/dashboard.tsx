@@ -32,18 +32,22 @@ import { SaleRepository } from '../../features/sales/Repositories';
 import { useEffect, useState } from 'react';
 import { InputWithLabel } from '../../components/Input';
 import {
+  calcAveDayly,
+  calcAveMonthly,
+  calcTotalMonthly,
+  calcTotalMonthlyGuests,
   calculateChange,
   calculateSalary,
   createMembers,
   isGuestsEmpty,
   isMembersEmpty,
 } from '@/utils';
-import { MonthlyTbody } from '../../components/Tbody';
 import { QuantityButton } from '../../components/QuantityButton';
 import { Thead } from '../../components/Thead';
 import { Loading } from '../../components/loading';
 import { MemberRepository } from '../../features/sales/Repositories';
 import { SubmitButton } from '../../components/Submit';
+import { LabelWithSaleInfo } from '../../components/Label';
 
 const DashboardPage: NextPage = () => {
   const router = useRouter();
@@ -274,18 +278,36 @@ const DashboardPage: NextPage = () => {
             </div>
           </div>
         </div>
-        <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
-          <table className='mt-16 w-full text-left shadow-md'>
-            <Thead
-              th={[
-                `${month}月の平均売上`,
-                `${month}月${day}日の平均客単価`,
-                `${month}月の売上累計`,
-                `${month}月の来客数累計`,
-              ]}
+        <div className='mx-auto mt-16 max-w-3xl sm:mt-20 sm:rounded-lg'>
+          <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-4'>
+            <LabelWithSaleInfo
+              name='montyly-avg-sales'
+              value={calcAveMonthly({ day, sale, sales: data ? data : [sale] })}
+              label={`${month}月平均売上`}
             />
-            <MonthlyTbody day={day} sale={sale} sales={data ? data : [sale]} />
-          </table>
+            <LabelWithSaleInfo
+              name='dayly-avg-sales'
+              value={calcAveDayly({ sale })}
+              label={`${month}/${day}平均客単価`}
+            />
+            <LabelWithSaleInfo
+              name='monthly-total-sales'
+              value={calcTotalMonthly({
+                day,
+                sale,
+                sales: data ? data : [sale],
+              })}
+              label={`${month}月売上累計`}
+            />
+            <LabelWithSaleInfo
+              name='monthly-total-guests'
+              value={calcTotalMonthlyGuests({
+                sale,
+                sales: data ? data : [sale],
+              })}
+              label={`${month}月来客数累計`}
+            />
+          </div>
         </div>
         <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
           <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-3'>
@@ -358,20 +380,11 @@ const DashboardPage: NextPage = () => {
             />
           </div>
           <div className='mt-5 flex justify-end text-right'>
-            <div>
-              <label
-                htmlFor='total'
-                className='block leading-6 text-gray-400 text-xl'
-              >
-                売上合計
-              </label>
-              <div className='mt-2.5 text-3xl'>
-                {(sale.cash + sale.card + sale.eMoney).toLocaleString('ja-JP', {
-                  style: 'currency',
-                  currency: 'JPY',
-                })}
-              </div>
-            </div>
+            <LabelWithSaleInfo
+              name='total'
+              value={sale.cash + sale.card + sale.eMoney}
+              label='売上合計'
+            />
           </div>
         </div>
         <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
@@ -758,7 +771,7 @@ const DashboardPage: NextPage = () => {
                     impression: e.target.value,
                   }))
                 }
-                placeholder='ランチタイムはサラリーマンやOLが中心で、通常通りの客入り。雨の影響はあまり感じなかった（パラパラ程度だった）傘が荷物になっているため、保管場所は要検討（スペースが足りていない）'
+                placeholder='業務連絡・報告事項・改善点など記入してください'
               />
             </div>
           </div>
