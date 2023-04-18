@@ -9,6 +9,7 @@ type Props = {
   value: string | number;
   onChange: React.ChangeEventHandler<HTMLSelectElement>;
   disabled?: boolean;
+  fullWidth?: boolean;
 };
 
 export const Select: FC<Props> = ({
@@ -20,6 +21,7 @@ export const Select: FC<Props> = ({
   value,
   onChange,
   disabled,
+  fullWidth,
 }) => {
   return (
     <>
@@ -34,7 +36,9 @@ export const Select: FC<Props> = ({
       <select
         id={htmlFor}
         name={name}
-        className={`rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 ${textSize}`}
+        className={`rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 ${textSize} ${
+          fullWidth && 'w-full'
+        }`}
         value={value}
         onChange={onChange}
         disabled={disabled}
