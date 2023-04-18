@@ -39,6 +39,7 @@ import {
   calculateChange,
   calculateSalary,
   createMembers,
+  dateFormat,
   isGuestsEmpty,
   isMembersEmpty,
 } from '@/utils';
@@ -63,7 +64,6 @@ const DashboardPage: NextPage = () => {
     (partialSum, a) => partialSum + a,
     0
   );
-
   const [members, setMembers] = useState<
     { name: string; salary: HouryType; createdAt: Date }[]
   >([{ name: '', salary: [...HOURLY][0], createdAt: new Date() }]);
@@ -194,88 +194,47 @@ const DashboardPage: NextPage = () => {
           loading ? 'blur-sm' : ''
         }`}
       >
-        <div className='mx-auto max-w-3xl content-center text-center'>
-          <div className='block md:hidden'>
-            <div className='text-2xl'>
-              {year}年
-              <Select
-                options={[...MONTHS]}
-                htmlFor={'month'}
-                textSize={'text-lg'}
-                value={month}
-                onChange={(e) => {
-                  router.replace({
-                    query: {
-                      ...router.query,
-                      month: e.target.value,
-                    },
-                  });
-                }}
-              />
-              月
-              <Select
-                options={[...DAYS]}
-                htmlFor={'day'}
-                textSize={'text-lg'}
-                value={day}
-                onChange={(e) => {
-                  router.replace({
-                    query: {
-                      ...router.query,
-                      day: e.target.value,
-                    },
-                  });
-                }}
-              />
-              日({dayOfWeek}){sale.weather}
-            </div>
+        <div className='grid grid-cols-3 gap-2 mx-auto max-w-3xl'>
+          <div className='col-span-3 md:col-span-1'>
+            <Select
+              options={[...WEATHERS]}
+              htmlFor={'weather'}
+              textSize={'text-3xl'}
+              value={sale.weather}
+              onChange={(e) => {
+                setSale((sale) => ({
+                  ...sale,
+                  weather: e.target.value as WeatherType,
+                }));
+              }}
+              fullWidth
+            />
           </div>
-          <div className='grid gap-2 grid-cols-1 items-center justify-center text-center'>
-            <div className='text-3xl hidden md:block'>
-              {year}年
-              <Select
-                options={[...MONTHS]}
-                htmlFor={'month'}
-                textSize={'text-3xl'}
-                value={month}
-                onChange={(e) => {
+          <div className='col-span-3 md:col-span-2 flex justify-center'>
+            <input
+              className='p-2.5 border border-gray-400 rounded-md cursor-pointer text-3xl w-full'
+              type='date'
+              id='start'
+              name='trip-start'
+              value={dateFormat(new Date(`${year}-${month}-${day}`))}
+              min='2023-03-01'
+              onChange={(e) => {
+                if (!!e.target.valueAsDate) {
+                  console.log(e.target.valueAsDate.getDay());
+                  const year = e.target.valueAsDate.getFullYear();
+                  const month = e.target.valueAsDate.getMonth() + 1;
+                  const day = e.target.valueAsDate.getDate();
                   router.replace({
                     query: {
                       ...router.query,
-                      month: e.target.value,
+                      month,
+                      day,
                     },
                   });
-                }}
-              />
-              月
-              <Select
-                options={[...DAYS]}
-                htmlFor={'day'}
-                textSize={'text-3xl'}
-                value={day}
-                onChange={(e) => {
-                  router.replace({
-                    query: {
-                      ...router.query,
-                      day: e.target.value,
-                    },
-                  });
-                }}
-              />
-              日 ({dayOfWeek})
-              <Select
-                options={[...WEATHERS]}
-                htmlFor={'weather'}
-                textSize={'text-3xl'}
-                value={sale.weather}
-                onChange={(e) => {
-                  setSale((sale) => ({
-                    ...sale,
-                    weather: e.target.value as WeatherType,
-                  }));
-                }}
-              />
-            </div>
+                }
+              }}
+            />
+            <div className='text-3xl p-2.5'>({dayOfWeek})</div>
           </div>
         </div>
         <div className='mx-auto mt-16 max-w-3xl sm:mt-20 sm:rounded-lg'>
@@ -433,7 +392,7 @@ const DashboardPage: NextPage = () => {
               {CHANGES.map((change) => {
                 return (
                   <tr key={change} className='border-b hover:bg-gray-50'>
-                    <td className='px-6 py-4 text-lg'>
+                    <td className='px-6 py-4 text-lg whitespace-nowrap'>
                       {CHANGE_TITLES[change]}
                     </td>
                     <td className='px-6 py-4'>
