@@ -72,7 +72,9 @@ const DashboardPage: NextPage = () => {
     0
   );
 
+  const [startDate, setStartDate] = useState(now);
   const handleChange = (date: Date) => {
+    setStartDate(date);
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -235,7 +237,7 @@ const DashboardPage: NextPage = () => {
             <DatePicker
               locale={ja}
               dateFormat='yyyy/MM/dd'
-              selected={now}
+              selected={startDate}
               onChange={handleChange}
               className='p-2.5 border border-gray-400 rounded-md cursor-pointer text-3xl w-full'
             />
