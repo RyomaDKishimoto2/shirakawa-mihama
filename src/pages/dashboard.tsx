@@ -50,6 +50,13 @@ import { MemberRepository } from '../../features/sales/Repositories';
 import { SubmitButton } from '../../components/Submit';
 import { LabelWithSaleInfo } from '../../components/Label';
 
+import DatePicker, { registerLocale } from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import ja from 'date-fns/locale/ja';
+import { CalendarIcon } from '@heroicons/react/24/outline';
+
+registerLocale('ja', ja);
+
 const DashboardPage: NextPage = () => {
   const router = useRouter();
   const now = new Date();
@@ -64,6 +71,20 @@ const DashboardPage: NextPage = () => {
     (partialSum, a) => partialSum + a,
     0
   );
+
+  const handleChange = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    router.replace({
+      query: {
+        ...router.query,
+        month,
+        day,
+      },
+    });
+  };
+
   const [members, setMembers] = useState<
     { name: string; salary: HouryType; createdAt: Date }[]
   >([{ name: '', salary: [...HOURLY][0], createdAt: new Date() }]);
@@ -211,7 +232,14 @@ const DashboardPage: NextPage = () => {
             />
           </div>
           <div className='col-span-3 md:col-span-2 flex justify-center'>
-            <input
+            <DatePicker
+              locale={ja}
+              dateFormat='yyyy/MM/dd'
+              selected={now}
+              onChange={handleChange}
+              className='p-2.5 border border-gray-400 rounded-md cursor-pointer text-3xl w-full'
+            />
+            {/* <input
               className='p-2.5 border border-gray-400 rounded-md cursor-pointer text-3xl w-full'
               type='date'
               id='start'
@@ -233,7 +261,7 @@ const DashboardPage: NextPage = () => {
                   });
                 }
               }}
-            />
+            /> */}
             <div className='text-3xl p-2.5'>({dayOfWeek})</div>
           </div>
         </div>
