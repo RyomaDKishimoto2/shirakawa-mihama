@@ -126,27 +126,27 @@ const DashboardPage: NextPage = () => {
     const target = data?.find(
       (sale) => sale.year === year && sale.month === month && sale.day === day
     );
-    console.log(target);
-    const MEMBERS = createMembers(target, staff);
-    const sale = target
-      ? ({
-          ...target,
-          year,
-          month,
-          day,
-          dayOfWeek,
-          members: MEMBERS,
-        } as SalesType)
-      : ({
-          ...SALE_INIT_VALUE,
-          year,
-          month,
-          day,
-          dayOfWeek,
-          members: MEMBERS,
-        } as SalesType);
-    setSale(sale);
-  }, [day]);
+    const members = createMembers(target, staff);
+    setSale(() => {
+      return target
+        ? ({
+            ...target,
+            year,
+            month,
+            day,
+            dayOfWeek,
+            members,
+          } as SalesType)
+        : ({
+            ...SALE_INIT_VALUE,
+            year,
+            month,
+            day,
+            dayOfWeek,
+            members,
+          } as SalesType);
+    });
+  }, [day, data]);
 
   useEffect(() => {
     if (!staff) {
@@ -156,13 +156,24 @@ const DashboardPage: NextPage = () => {
       (sale) => sale.year === year && sale.month === month && sale.day === day
     );
     const members = createMembers(target ? target : sale, staff);
-    setSale(
-      (prev) =>
-        ({
-          ...(target ? target : prev),
-          members,
-          optionals: target ? target.optionals : prev.optionals,
-        } as SalesType)
+    setSale(() =>
+      target
+        ? ({
+            ...target,
+            year,
+            month,
+            day,
+            dayOfWeek,
+            members,
+          } as SalesType)
+        : ({
+            ...SALE_INIT_VALUE,
+            year,
+            month,
+            day,
+            dayOfWeek,
+            members,
+          } as SalesType)
     );
     setStartDate(new Date(`${year}-${month}-${day}`));
   }, [staff]);
@@ -196,7 +207,7 @@ const DashboardPage: NextPage = () => {
       setLoading(false);
     }
   };
-  console.log('sale =>', sale);
+
   if (!staff) {
     return (
       <ProtectedRoute>
