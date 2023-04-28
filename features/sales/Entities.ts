@@ -5,6 +5,7 @@ import {
   WeatherType,
   SupplierType,
   HouryType,
+  OptioanlType,
 } from '../const';
 
 export class Sales {
@@ -24,7 +25,8 @@ export class Sales {
     public total: number,
     public impression: string,
     public suppliers: SupplierType,
-    public staffSalaries: number
+    public staffSalaries: number,
+    public optionals: OptioanlType[]
   ) {}
 }
 

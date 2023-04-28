@@ -51,9 +51,9 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                     </Disclosure.Button>
                   </div>
                   <div className='flex flex-1 items-center justify-center sm:justify-start'>
-                    <div className='flex-shrink-0 items-center hidden md:block'>
+                    {/* <div className='flex-shrink-0 items-center hidden md:block'>
                       {user && user.role === RoleType.ADMIN && <Download />}
-                    </div>
+                    </div> */}
                     {user && user.userId && (
                       <div className='hidden lg:block'>
                         <div className='flex space-x-2'>

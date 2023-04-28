@@ -8,6 +8,13 @@ import {
 import { Sales } from '../features/sales/Entities';
 import { Member } from '../features/sales/Repositories';
 
+export const isOptionalNameEmpty = (optional: {
+  name: string;
+  value: number;
+}): boolean => {
+  return optional.value && !optional.name ? true : false;
+};
+
 export const isGuestsEmpty = (sales: SalesType): boolean => {
   return !sales.guests && (sales.cash || sales.card || sales.eMoney)
     ? true
@@ -86,7 +93,7 @@ export const createMembers = (
   sales: Sales | undefined,
   initMembers: Member[]
 ) => {
-  return sales
+  return sales && sales.members.length
     ? sales.members.map((member) => {
         return {
           name: member.name,

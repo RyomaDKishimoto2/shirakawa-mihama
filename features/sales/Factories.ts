@@ -20,7 +20,8 @@ const createFromResponse = (responses: SalesType[]) => {
       res.total,
       res.impression,
       res.suppliers,
-      res.staffSalaries
+      res.staffSalaries,
+      res.optionals
     );
   });
 };

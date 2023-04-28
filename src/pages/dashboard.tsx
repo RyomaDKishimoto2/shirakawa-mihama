@@ -31,6 +31,7 @@ import useSWR from 'swr';
 import { SaleRepository } from '../../features/sales/Repositories';
 import { useEffect, useState } from 'react';
 import { InputWithLabel } from '../../components/Input';
+import { InputOptional } from '../../components/InputOptional';
 import {
   calcAveDayly,
   calcAveMonthly,
@@ -42,6 +43,7 @@ import {
   dateFormat,
   isGuestsEmpty,
   isMembersEmpty,
+  isOptionalNameEmpty,
 } from '@/utils';
 import { QuantityButton } from '../../components/QuantityButton';
 import { Thead } from '../../components/Thead';
@@ -53,7 +55,7 @@ import { LabelWithSaleInfo } from '../../components/Label';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ja from 'date-fns/locale/ja';
-import { CalendarIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 registerLocale('ja', ja);
 
@@ -67,12 +69,15 @@ const DashboardPage: NextPage = () => {
   const dayOfWeek = weekItems[theDay.getDay()];
   const [loading, setLoading] = useState<boolean>(false);
   const [sale, setSale] = useState<SalesType>(SALE_INIT_VALUE);
-  const paymentTotal = Object.values(sale.suppliers).reduce(
-    (partialSum, a) => partialSum + a,
-    0
+  const paymentTotal = [
+    ...sale.optionals.map((op) => op.value),
+    ...Object.values(sale.suppliers),
+  ].reduce((partialSum, a) => partialSum + a, 0);
+
+  const [startDate, setStartDate] = useState<Date>(
+    new Date(`${year}-${month}-${day}`)
   );
 
-  const [startDate, setStartDate] = useState(now);
   const handleChange = (date: Date) => {
     setStartDate(date);
     const year = date.getFullYear();
@@ -86,10 +91,6 @@ const DashboardPage: NextPage = () => {
       },
     });
   };
-
-  const [members, setMembers] = useState<
-    { name: string; salary: HouryType; createdAt: Date }[]
-  >([{ name: '', salary: [...HOURLY][0], createdAt: new Date() }]);
 
   const { data, mutate } = useSWR(
     year && month ? `/api/sales/${year}/${month}/${day}` : null,
@@ -115,21 +116,18 @@ const DashboardPage: NextPage = () => {
   );
 
   useEffect(() => {
-    if (!staff) {
-      return;
-    }
-    setMembers(staff);
-  }, [staff]);
-
-  useEffect(() => {
     mutate();
   }, [month]);
 
   useEffect(() => {
+    if (!staff) {
+      return;
+    }
     const target = data?.find(
       (sale) => sale.year === year && sale.month === month && sale.day === day
     );
-    const MEMBERS = createMembers(target, members);
+    console.log(target);
+    const MEMBERS = createMembers(target, staff);
     const sale = target
       ? ({
           ...target,
@@ -147,60 +145,58 @@ const DashboardPage: NextPage = () => {
           dayOfWeek,
           members: MEMBERS,
         } as SalesType);
-
     setSale(sale);
   }, [day]);
 
   useEffect(() => {
+    if (!staff) {
+      return;
+    }
     const target = data?.find(
       (sale) => sale.year === year && sale.month === month && sale.day === day
     );
-    const MEMBERS = createMembers(target, members);
-    const sale = target
-      ? ({
-          ...target,
-          year,
-          month,
-          day,
-          dayOfWeek,
-          members: MEMBERS,
+    const members = createMembers(target ? target : sale, staff);
+    setSale(
+      (prev) =>
+        ({
+          ...(target ? target : prev),
+          members,
+          optionals: target ? target.optionals : prev.optionals,
         } as SalesType)
-      : ({
-          ...SALE_INIT_VALUE,
-          year,
-          month,
-          day,
-          dayOfWeek,
-          members: MEMBERS,
-        } as SalesType);
-    setSale(sale);
-  }, [data, members]);
+    );
+    setStartDate(new Date(`${year}-${month}-${day}`));
+  }, [staff]);
 
   const onSubmit = async () => {
     setLoading(true);
     try {
       if (isGuestsEmpty(sale)) {
-        return alert('来客数が未入力です');
+        throw new Error('来客数が未入力です');
       }
       const onDutyMembers = (sale.members as MemberType[]).filter(
         (member) => member.status === '出勤'
       );
       if (isMembersEmpty(onDutyMembers)) {
-        return alert('出勤者が未入力です');
+        throw new Error('出勤者が未入力です');
       }
+      sale.optionals?.map((op) => {
+        if (isOptionalNameEmpty(op)) {
+          throw new Error('項目名が未入力です');
+        }
+      });
       const staffSalaries = Math.ceil(
         onDutyMembers.reduce((accum, item) => accum + item.amount, 0)
       );
       const param = { ...sale, staffSalaries };
       await SaleRepository.create({ param });
-    } catch (e) {
-      console.error(e);
+      alert('🚀今日もお疲れ様でした😊');
+    } catch (e: any) {
+      alert(e.message);
     } finally {
       setLoading(false);
-      alert('🚀今日もお疲れ様でした😊');
     }
   };
-
+  console.log('sale =>', sale);
   if (!staff) {
     return (
       <ProtectedRoute>
@@ -241,29 +237,6 @@ const DashboardPage: NextPage = () => {
               onChange={handleChange}
               className='p-2.5 border border-gray-400 rounded-md cursor-pointer text-3xl w-full'
             />
-            {/* <input
-              className='p-2.5 border border-gray-400 rounded-md cursor-pointer text-3xl w-full'
-              type='date'
-              id='start'
-              name='trip-start'
-              value={dateFormat(new Date(`${year}-${month}-${day}`))}
-              min='2023-03-01'
-              onChange={(e) => {
-                if (!!e.target.valueAsDate) {
-                  console.log(e.target.valueAsDate.getDay());
-                  const year = e.target.valueAsDate.getFullYear();
-                  const month = e.target.valueAsDate.getMonth() + 1;
-                  const day = e.target.valueAsDate.getDate();
-                  router.replace({
-                    query: {
-                      ...router.query,
-                      month,
-                      day,
-                    },
-                  });
-                }
-              }}
-            /> */}
             <div className='text-3xl p-2.5'>({dayOfWeek})</div>
           </div>
         </div>
@@ -397,6 +370,67 @@ const DashboardPage: NextPage = () => {
                 />
               );
             })}
+            {sale.optionals &&
+              sale.optionals.length > 0 &&
+              sale.optionals.map((optional, i) => {
+                return (
+                  <InputOptional
+                    key={i}
+                    name={optional.name}
+                    value={optional.value}
+                    labelSize='text-xl'
+                    InputSize='text-xl'
+                    label='項目名'
+                    onChangeName={(name) => {
+                      setSale((prev) => ({
+                        ...prev,
+                        optionals: [
+                          ...(prev.optionals
+                            ? prev.optionals.map((op, j) =>
+                                i === j ? { ...op, name: name } : op
+                              )
+                            : []),
+                        ],
+                      }));
+                    }}
+                    onChangeValue={(v) => {
+                      setSale((prev) => ({
+                        ...prev,
+                        optionals: [
+                          ...(prev.optionals
+                            ? prev.optionals.map((op, j) =>
+                                i === j ? { ...op, value: v } : op
+                              )
+                            : []),
+                        ],
+                      }));
+                    }}
+                    invalid={isOptionalNameEmpty(optional)}
+                  />
+                );
+              })}
+
+            <span className='flex items-end'>
+              <button
+                type='button'
+                className='w-full rounded-md bg-indigo-900 px-3 py-2 text-sm text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                onClick={() => {
+                  setSale((prev) => ({
+                    ...prev,
+                    optionals: [
+                      ...(prev.optionals ? prev.optionals : []),
+                      { name: '', value: 0 },
+                    ],
+                  }));
+                }}
+              >
+                <PlusIcon
+                  className='-ml-0.5 mr-1.5 h-5 w-5 text-gray-400 inline'
+                  aria-hidden='true'
+                />
+                項目を追加する
+              </button>
+            </span>
           </div>
           <div className='mt-5 flex justify-end text-right'>
             <div>

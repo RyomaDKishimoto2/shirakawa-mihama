@@ -1,11 +1,11 @@
 export const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
-export type MonthType = typeof MONTHS[number];
+export type MonthType = (typeof MONTHS)[number];
 export const DAYS = [...Array(31)].map((_, i) => i + 1);
-export type DaysType = typeof DAYS[number];
+export type DaysType = (typeof DAYS)[number];
 export const YEARS = [2023, 2024, 2025, 2026] as const;
-export type YearType = typeof YEARS[number];
+export type YearType = (typeof YEARS)[number];
 export const weekItems = ['日', '月', '火', '水', '木', '金', '土'] as const;
-export type DayOfWeekType = typeof weekItems[number];
+export type DayOfWeekType = (typeof weekItems)[number];
 export const WEATHERS = [
   '晴れ',
   '曇り',
@@ -14,19 +14,20 @@ export const WEATHERS = [
   '雨のち晴',
   '晴れのち雨',
 ] as const;
-export type WeatherType = typeof WEATHERS[number];
+export type WeatherType = (typeof WEATHERS)[number];
 
 export const STATUS = { offWork: '休み', working: '出勤' } as const;
-export type StatusType = typeof STATUS[keyof typeof STATUS];
+export type StatusType = (typeof STATUS)[keyof typeof STATUS];
 
 export const HOURS = [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25] as const;
-export type HourType = typeof HOURS[number];
+export type HourType = (typeof HOURS)[number];
 
 export const MINUTES = [0, 15, 30, 45] as const;
-export type MinuteType = typeof MINUTES[number];
+export type MinuteType = (typeof MINUTES)[number];
 
 export const HOURLY = [900, 950, 1000, 1100, 1200, 1300, 1400, 1500] as const;
-export type HouryType = typeof HOURLY[number];
+export type HouryType = (typeof HOURLY)[number];
+
 export type MemberType = {
   name: string;
   status: StatusType;
@@ -47,7 +48,10 @@ export const MEMBER_INIT_VALUE: MemberType = {
   hourly: [...HOURLY][0],
   amount: 0,
 };
-
+export type OptioanlType = {
+  name: string;
+  value: number;
+};
 export const CHANGES = [
   'Ichiman',
   'Gosen',
@@ -60,7 +64,7 @@ export const CHANGES = [
   'Go',
   'Ichi',
 ] as const;
-export type ChangeLabelType = typeof CHANGES[number];
+export type ChangeLabelType = (typeof CHANGES)[number];
 
 export const CHANGE_TITLES = {
   Ichiman: '1万円',
@@ -121,7 +125,7 @@ export const SUPPLIERS = [
   'kounetuhi',
   'tushinhi',
 ] as const;
-export type SupplierLabelType = typeof SUPPLIERS[number];
+export type SupplierLabelType = (typeof SUPPLIERS)[number];
 
 export const SUPPLIER_NAME = {
   suehiro: '末広商店',
@@ -203,6 +207,7 @@ export type SalesType = {
   total: number;
   impression: string;
   staffSalaries: number;
+  optionals: OptioanlType[] | [];
 };
 
 export const SALE_INIT_VALUE: SalesType = {
@@ -215,11 +220,12 @@ export const SALE_INIT_VALUE: SalesType = {
   guests: 0,
   senbero: 0,
   changes: CHANGE_INIT_VALUES,
-  members: [MEMBER_INIT_VALUE],
+  members: [],
   suppliers: SUPPLIER_INIT_VALUES,
   dayOfWeek: '月',
   weather: '晴れ',
   total: 0,
   impression: '',
   staffSalaries: 0,
+  optionals: [],
 };
