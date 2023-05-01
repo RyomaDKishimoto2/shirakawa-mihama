@@ -25,6 +25,7 @@ import {
   DaysType,
   MemberType,
   StatusType,
+  DayOfWeekType,
 } from '../../features/const';
 import { Select } from '../../components/Select';
 import useSWR from 'swr';
@@ -59,6 +60,72 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 
 registerLocale('ja', ja);
 
+const createSaleForm = ({
+  sale,
+  year,
+  month,
+  day,
+  dayOfWeek,
+  members,
+}: {
+  sale: SalesType | undefined;
+  year: YearType;
+  month: MonthType;
+  day: DaysType;
+  dayOfWeek: DayOfWeekType;
+  members?: MemberType[];
+}) => {
+  return {
+    year: sale?.year || year,
+    month: sale?.month || month,
+    day: sale?.day || day,
+    cash: sale?.cash || 0,
+    card: sale?.card || 0,
+    eMoney: sale?.eMoney || 0,
+    guests: sale?.guests || 0,
+    senbero: sale?.senbero || 0,
+    changes: sale?.changes || {
+      Ichiman: 0,
+      Gosen: 0,
+      Nisen: 0,
+      Sen: 0,
+      Gohyaku: 0,
+      Hyaku: 0,
+      Gojyu: 0,
+      Jyu: 0,
+      Go: 0,
+      Ichi: 0,
+    },
+    members: members ? members : sale ? sale.members : [],
+    dayOfWeek: sale?.dayOfWeek || dayOfWeek,
+    suppliers: sale?.suppliers || {
+      suehiro: 0,
+      sakihama: 0,
+      miyazato: 0,
+      ganaha: 0,
+      BEEFshin: 0,
+      zenoki: 0,
+      sunny: 0,
+      shopping: 0,
+      zappi: 0,
+      kemutou: 0,
+      gyoumu: 0,
+      furikomiFee: 0,
+      cardFee: 0,
+      eigyou: 0,
+      koutuhi: 0,
+      yachin: 0,
+      kounetuhi: 0,
+      tushinhi: 0,
+    },
+    weather: sale?.weather || '晴れ',
+    total: sale?.total || 0,
+    impression: sale?.impression || '',
+    staffSalaries: sale?.staffSalaries || '',
+    optionals: sale?.optionals || [],
+  };
+};
+
 const DashboardPage: NextPage = () => {
   const router = useRouter();
   const now = new Date();
@@ -68,12 +135,6 @@ const DashboardPage: NextPage = () => {
   const theDay = new Date(year, month - 1, day);
   const dayOfWeek = weekItems[theDay.getDay()];
   const [loading, setLoading] = useState<boolean>(false);
-  const [sale, setSale] = useState<SalesType>(SALE_INIT_VALUE);
-  const paymentTotal = [
-    ...sale.optionals.map((op) => op.value),
-    ...Object.values(sale.suppliers),
-  ].reduce((partialSum, a) => partialSum + a, 0);
-
   const [startDate, setStartDate] = useState<Date>(
     new Date(`${year}-${month}-${day}`)
   );
@@ -98,6 +159,21 @@ const DashboardPage: NextPage = () => {
       return await SaleRepository.getSales({ year, month });
     },
     {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      revalidateOnReconnect: false,
+      refreshWhenOffline: false,
+      refreshWhenHidden: false,
+      refreshInterval: 0,
+    }
+  );
+
+  const { data: staff } = useSWR(
+    '/admin/members',
+    async () => {
+      return await MemberRepository.getMembers();
+    },
+    {
       // revalidateOnFocus: false,
       // revalidateOnMount: false,
       // revalidateOnReconnect: false,
@@ -107,76 +183,71 @@ const DashboardPage: NextPage = () => {
     }
   );
 
-  const { data: staff } = useSWR(
-    '/admin/members',
-    async () => {
-      return await MemberRepository.getMembers();
-    },
-    { refreshWhenHidden: false }
+  const todaySale: SalesType | undefined = data?.find(
+    (sale) => sale.year === year && sale.month === month && sale.day === day
   );
+
+  const [sale, setSale] = useState<SalesType>(
+    createSaleForm({
+      year,
+      month,
+      day,
+      sale: todaySale,
+      dayOfWeek,
+    }) as SalesType
+  );
+
+  useEffect(() => {
+    if (!staff) {
+      return;
+    }
+    const members = createMembers(todaySale, staff);
+    setSale(
+      createSaleForm({
+        year,
+        month,
+        day,
+        sale: todaySale,
+        members,
+        dayOfWeek,
+      }) as SalesType
+    );
+  }, [todaySale]);
+
+  useEffect(() => {
+    if (!staff) {
+      return;
+    }
+    const members = createMembers(todaySale ? todaySale : sale, staff);
+    setSale(
+      (prev) =>
+        ({
+          ...prev,
+          members,
+        } as SalesType)
+    );
+  }, [staff]);
+
+  useEffect(() => {
+    setSale(
+      createSaleForm({
+        year,
+        month,
+        day,
+        sale: todaySale,
+        dayOfWeek,
+      }) as SalesType
+    );
+  }, []);
+
+  const paymentTotal = [
+    ...sale.optionals.map((op) => op.value),
+    ...Object.values(sale.suppliers),
+  ].reduce((partialSum, a) => partialSum + a, 0);
 
   useEffect(() => {
     mutate();
   }, [month]);
-
-  useEffect(() => {
-    if (!staff) {
-      return;
-    }
-    const target = data?.find(
-      (sale) => sale.year === year && sale.month === month && sale.day === day
-    );
-    const members = createMembers(target, staff);
-    setSale(() => {
-      return target
-        ? ({
-            ...target,
-            year,
-            month,
-            day,
-            dayOfWeek,
-            members,
-          } as SalesType)
-        : ({
-            ...SALE_INIT_VALUE,
-            year,
-            month,
-            day,
-            dayOfWeek,
-            members,
-          } as SalesType);
-    });
-  }, [day, data]);
-
-  useEffect(() => {
-    if (!staff) {
-      return;
-    }
-    const target = data?.find(
-      (sale) => sale.year === year && sale.month === month && sale.day === day
-    );
-    const members = createMembers(target ? target : sale, staff);
-    setSale(() =>
-      target
-        ? ({
-            ...target,
-            year,
-            month,
-            day,
-            dayOfWeek,
-            members,
-          } as SalesType)
-        : ({
-            ...SALE_INIT_VALUE,
-            year,
-            month,
-            day,
-            dayOfWeek,
-            members,
-          } as SalesType)
-    );
-    setStartDate(new Date(`${year}-${month}-${day}`));
-  }, [staff]);
 
   const onSubmit = async () => {
     setLoading(true);
@@ -798,7 +869,7 @@ const DashboardPage: NextPage = () => {
                 id='message'
                 rows={5}
                 className='block w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-lg text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6'
-                value={sale.impression || ''}
+                value={sale.impression}
                 onChange={(e) =>
                   setSale((sale) => ({
                     ...sale,

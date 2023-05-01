@@ -92,7 +92,7 @@ export const isNumber = (data: number | undefined) => {
 export const createMembers = (
   sales: Sales | undefined,
   initMembers: Member[]
-) => {
+): MemberType[] => {
   return sales && sales.members.length
     ? sales.members.map((member) => {
         return {
