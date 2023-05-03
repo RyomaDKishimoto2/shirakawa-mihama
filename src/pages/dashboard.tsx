@@ -136,7 +136,8 @@ const DashboardPage: NextPage = () => {
   const dayOfWeek = weekItems[theDay.getDay()];
   const [loading, setLoading] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date>(
-    new Date(`${year}-${month}-${day}`)
+    // new Date(`${year}-${month}-${day}`)
+    new Date(`${year}/${month}/${day}`)
   );
 
   const handleChange = (date: Date) => {
