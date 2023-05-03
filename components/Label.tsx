@@ -21,3 +21,23 @@ export const LabelWithSaleInfo: FC<Props> = ({ value, name, label }) => {
     </div>
   );
 };
+
+export const SaleInfoLabel: FC<{
+  value: number | string;
+  label: string;
+  isSale?: boolean;
+}> = ({ value, label, isSale = true }) => {
+  return (
+    <div className='border-t border-gray-200 pt-4'>
+      <dt className='font-medium text-gray-900 text-xl'>{label}</dt>
+      <dd className='mt-2 text-gray-500 text-3xl'>
+        {isSale
+          ? value.toLocaleString('ja-JP', {
+              style: 'currency',
+              currency: 'JPY',
+            })
+          : value}
+      </dd>
+    </div>
+  );
+};

@@ -19,7 +19,9 @@ export type WeatherType = (typeof WEATHERS)[number];
 export const STATUS = { offWork: '休み', working: '出勤' } as const;
 export type StatusType = (typeof STATUS)[keyof typeof STATUS];
 
-export const HOURS = [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25] as const;
+export const HOURS = [
+  13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+] as const;
 export type HourType = (typeof HOURS)[number];
 
 export const MINUTES = [0, 15, 30, 45] as const;

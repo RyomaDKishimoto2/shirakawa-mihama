@@ -51,7 +51,7 @@ import { Thead } from '../../components/Thead';
 import { Loading } from '../../components/loading';
 import { MemberRepository } from '../../features/sales/Repositories';
 import { SubmitButton } from '../../components/Submit';
-import { LabelWithSaleInfo } from '../../components/Label';
+import { LabelWithSaleInfo, SaleInfoLabel } from '../../components/Label';
 
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -136,7 +136,6 @@ const DashboardPage: NextPage = () => {
   const dayOfWeek = weekItems[theDay.getDay()];
   const [loading, setLoading] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date>(
-    // new Date(`${year}-${month}-${day}`)
     new Date(`${year}/${month}/${day}`)
   );
 
@@ -174,14 +173,7 @@ const DashboardPage: NextPage = () => {
     async () => {
       return await MemberRepository.getMembers();
     },
-    {
-      // revalidateOnFocus: false,
-      // revalidateOnMount: false,
-      // revalidateOnReconnect: false,
-      // refreshWhenOffline: false,
-      refreshWhenHidden: false,
-      // refreshInterval: 0,
-    }
+    { refreshWhenHidden: false }
   );
 
   const todaySale: SalesType | undefined = data?.find(
@@ -227,6 +219,7 @@ const DashboardPage: NextPage = () => {
           members,
         } as SalesType)
     );
+    setStartDate(new Date(`${year}/${month}/${day}`));
   }, [staff]);
 
   useEffect(() => {
@@ -245,6 +238,13 @@ const DashboardPage: NextPage = () => {
     ...sale.optionals.map((op) => op.value),
     ...Object.values(sale.suppliers),
   ].reduce((partialSum, a) => partialSum + a, 0);
+
+  const changesTotal = CHANGES.map((v) => {
+    return calculateChange({
+      change: sale.changes[v],
+      type: v,
+    });
+  }).reduce((partialSum, a) => partialSum + a, 0);
 
   useEffect(() => {
     mutate();
@@ -324,19 +324,16 @@ const DashboardPage: NextPage = () => {
           </div>
         </div>
         <div className='mx-auto mt-16 max-w-3xl sm:mt-20 sm:rounded-lg'>
-          <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-4'>
-            <LabelWithSaleInfo
-              name='montyly-avg-sales'
+          <dl className='mt-16 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 sm:gap-y-16 lg:gap-x-8'>
+            <SaleInfoLabel
               value={calcAveMonthly({ day, sale, sales: data ? data : [sale] })}
               label={`${month}月平均売上`}
             />
-            <LabelWithSaleInfo
-              name='dayly-avg-sales'
+            <SaleInfoLabel
               value={calcAveDayly({ sale })}
               label={`${month}/${day}平均客単価`}
             />
-            <LabelWithSaleInfo
-              name='monthly-total-sales'
+            <SaleInfoLabel
               value={calcTotalMonthly({
                 day,
                 sale,
@@ -344,15 +341,14 @@ const DashboardPage: NextPage = () => {
               })}
               label={`${month}月売上累計`}
             />
-            <LabelWithSaleInfo
-              name='monthly-total-guests'
-              value={calcTotalMonthlyGuests({
+            <SaleInfoLabel
+              value={`${calcTotalMonthlyGuests({
                 sale,
                 sales: data ? data : [sale],
-              })}
+              })}人`}
               label={`${month}月来客数累計`}
             />
-          </div>
+          </dl>
         </div>
         <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
           <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-3'>
@@ -611,18 +607,20 @@ const DashboardPage: NextPage = () => {
               >
                 釣り銭合計
               </label>
-              <div className='mt-2.5 text-3xl'>
-                {CHANGES.map((v) => {
-                  return calculateChange({
-                    change: sale.changes[v],
-                    type: v,
-                  });
-                })
-                  .reduce((partialSum, a) => partialSum + a, 0)
-                  .toLocaleString('ja-JP', {
-                    style: 'currency',
-                    currency: 'JPY',
-                  })}
+              <div className='mt-2.5 text-3xl flex items-center'>
+                {changesTotal > 0 && changesTotal !== 60000 && (
+                  <span className='mr-3 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-lg font-medium text-red-700 ring-1 ring-inset ring-red-600/10'>
+                    差額:
+                    {(changesTotal - 60000).toLocaleString('ja-JP', {
+                      style: 'currency',
+                      currency: 'JPY',
+                    })}
+                  </span>
+                )}
+                {changesTotal.toLocaleString('ja-JP', {
+                  style: 'currency',
+                  currency: 'JPY',
+                })}
               </div>
             </div>
           </div>
@@ -849,7 +847,11 @@ const DashboardPage: NextPage = () => {
               >
                 お給料合計
               </label>
-              <div className='mt-2.5 text-3xl'>
+              <div className='mt-2.5 text-3xl flex items-center'>
+                <span className='mr-3 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-lg font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10'>
+                  出勤者数
+                  {sale.members.filter((mem) => mem.status === '出勤').length}人
+                </span>
                 {sale.members
                   .reduce((partialSum, a) => partialSum + a.amount, 0)
                   .toLocaleString('ja-JP', {

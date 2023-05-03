@@ -173,7 +173,10 @@ export const calcTotalMonthlyGuests = ({
   sales: SalesType[];
 }) => {
   const totalGuests =
-    sales.reduce((accum, sale) => accum + sale.guests, 0) + sale.guests;
+    sales
+      .filter((sa) => sa.day < sale.day)
+      .reduce((accum, sale) => accum + sale.guests, 0) + sale.guests;
+
   return totalGuests;
 };
 
