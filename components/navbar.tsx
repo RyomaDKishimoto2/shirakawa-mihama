@@ -61,7 +61,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                             <Link key={index} href={item.href} legacyBehavior>
                               <a
                                 className={classNames(
-                                  router.asPath.indexOf(item.href) != -1
+                                  router.asPath.includes(item.href)
                                     ? 'bg-gray-900 text-white'
                                     : 'text-gray-400 bg-slate-100 hover:text-white',
                                   'rounded-md px-4 py-3 text-lg font-medium'
@@ -76,13 +76,13 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                             <Link href='/members' legacyBehavior>
                               <a
                                 className={classNames(
-                                  router.asPath === '/members'
+                                  router.asPath.includes('/members')
                                     ? 'bg-gray-900 text-white'
                                     : 'text-gray-400 bg-slate-100 hover:text-white',
                                   'rounded-md px-4 py-3 text-lg font-medium'
                                 )}
                                 aria-current={
-                                  router.asPath === '/members'
+                                  router.asPath.includes('/members')
                                     ? 'page'
                                     : undefined
                                 }
@@ -161,7 +161,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                       as='a'
                       href={item.href}
                       className={classNames(
-                        router.asPath === item.href
+                        router.asPath.includes(item.href)
                           ? 'bg-gray-900 text-white'
                           : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                         'block rounded-md px-3 py-2 text-base font-medium'
@@ -176,13 +176,13 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                       as='a'
                       href='/members'
                       className={classNames(
-                        router.asPath === '/members'
+                        router.asPath.includes('/members')
                           ? 'bg-gray-900 text-white'
                           : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                         'block rounded-md px-3 py-2 text-base font-medium'
                       )}
                       aria-current={
-                        router.asPath === '/members' ? 'page' : undefined
+                        router.asPath.includes('/members') ? 'page' : undefined
                       }
                     >
                       スタッフ管理
