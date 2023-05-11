@@ -180,6 +180,22 @@ export const calcTotalMonthlyGuests = ({
   return totalGuests;
 };
 
+export const calcTotalMonthlyLabor = ({
+  day,
+  sales,
+  todayLabor,
+}: {
+  day: number;
+  sales: SalesType[];
+  todayLabor: number;
+}) => {
+  const totalCost =
+    sales
+      .filter((sa) => sa.day < day)
+      .reduce((accum, sale) => accum + sale.staffSalaries, 0) + todayLabor;
+  return Number(totalCost);
+};
+
 export const dateFormat = (date: Date): string => {
   date.setDate(date.getDate());
   const yyyy = date.getFullYear();

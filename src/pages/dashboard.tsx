@@ -38,6 +38,7 @@ import {
   calcAveMonthly,
   calcTotalMonthly,
   calcTotalMonthlyGuests,
+  calcTotalMonthlyLabor,
   calculateChange,
   calculateSalary,
   createMembers,
@@ -234,6 +235,11 @@ const DashboardPage: NextPage = () => {
     );
   }, []);
 
+  const laborTotal = sale.members.reduce(
+    (partialSum, a) => partialSum + a.amount,
+    0
+  );
+
   const paymentTotal = [
     ...sale.optionals.map((op) => op.value),
     ...Object.values(sale.suppliers),
@@ -324,7 +330,7 @@ const DashboardPage: NextPage = () => {
           </div>
         </div>
         <div className='mx-auto mt-16 max-w-3xl sm:mt-20 sm:rounded-lg'>
-          <dl className='mt-16 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 sm:gap-y-16 lg:gap-x-8'>
+          <dl className='mt-16 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-3 sm:gap-y-16 lg:gap-x-8'>
             <SaleInfoLabel
               value={calcAveMonthly({ day, sale, sales: data ? data : [sale] })}
               label={`${month}月平均売上`}
@@ -347,6 +353,15 @@ const DashboardPage: NextPage = () => {
                 sales: data ? data : [sale],
               })}人`}
               label={`${month}月来客数累計`}
+            />
+            <SaleInfoLabel
+              value={calcTotalMonthlyLabor({
+                day,
+                todayLabor: laborTotal,
+                sales: data ? data : [sale],
+              })}
+              label={`${month}月人件費累計`}
+              isSale={true}
             />
           </dl>
         </div>
@@ -852,12 +867,10 @@ const DashboardPage: NextPage = () => {
                   出勤者数
                   {sale.members.filter((mem) => mem.status === '出勤').length}人
                 </span>
-                {sale.members
-                  .reduce((partialSum, a) => partialSum + a.amount, 0)
-                  .toLocaleString('ja-JP', {
-                    style: 'currency',
-                    currency: 'JPY',
-                  })}
+                {laborTotal.toLocaleString('ja-JP', {
+                  style: 'currency',
+                  currency: 'JPY',
+                })}
               </div>
             </div>
           </div>
