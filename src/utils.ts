@@ -89,12 +89,15 @@ export const isNumber = (data: number | undefined) => {
   return !data ? 0 : data;
 };
 
-export const createMembers = (
-  sales: Sales | undefined,
-  initMembers: Member[]
-): MemberType[] => {
-  return sales && sales.members.length
-    ? sales.members.map((member) => {
+export const createMembers = ({
+  sale,
+  initMembers,
+}: {
+  sale: Sales | undefined;
+  initMembers: Member[];
+}): MemberType[] => {
+  return sale && sale.members.length
+    ? sale.members.map((member) => {
         return {
           name: member.name,
           status: member.status,
@@ -194,6 +197,22 @@ export const calcTotalMonthlyLabor = ({
       .filter((sa) => sa.day < day)
       .reduce((accum, sale) => accum + sale.staffSalaries, 0) + todayLabor;
   return Number(totalCost);
+};
+
+export const calcTotalSalary = ({
+  name,
+  sales,
+}: {
+  name: string;
+  sales: SalesType[];
+}) => {
+  const salary = sales.flatMap((s) => {
+    if (!Array.isArray(s.members)) {
+      return [];
+    }
+    return s.members.filter((m) => m.name === name);
+  });
+  return salary.reduce((accum, sale) => accum + sale.amount, 0);
 };
 
 export const dateFormat = (date: Date): string => {

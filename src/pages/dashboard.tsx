@@ -5,12 +5,9 @@ import {
   MonthType,
   weekItems,
   YearType,
-  MONTHS,
-  DAYS,
   WEATHERS,
   WeatherType,
   SalesType,
-  SALE_INIT_VALUE,
   SUPPLIERS,
   SUPPLIER_NAME,
   CHANGES,
@@ -18,7 +15,6 @@ import {
   HOURLY,
   HOURS,
   HourType,
-  HouryType,
   MINUTES,
   MinuteType,
   STATUS,
@@ -39,10 +35,10 @@ import {
   calcTotalMonthly,
   calcTotalMonthlyGuests,
   calcTotalMonthlyLabor,
+  calcTotalSalary,
   calculateChange,
   calculateSalary,
   createMembers,
-  dateFormat,
   isGuestsEmpty,
   isMembersEmpty,
   isOptionalNameEmpty,
@@ -53,7 +49,6 @@ import { Loading } from '../../components/loading';
 import { MemberRepository } from '../../features/sales/Repositories';
 import { SubmitButton } from '../../components/Submit';
 import { LabelWithSaleInfo, SaleInfoLabel } from '../../components/Label';
-
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ja from 'date-fns/locale/ja';
@@ -195,7 +190,7 @@ const DashboardPage: NextPage = () => {
     if (!staff) {
       return;
     }
-    const members = createMembers(todaySale, staff);
+    const members = createMembers({ sale: todaySale, initMembers: staff });
     setSale(
       createSaleForm({
         year,
@@ -212,7 +207,10 @@ const DashboardPage: NextPage = () => {
     if (!staff) {
       return;
     }
-    const members = createMembers(todaySale ? todaySale : sale, staff);
+    const members = createMembers({
+      sale: todaySale ? todaySale : sale,
+      initMembers: staff,
+    });
     setSale(
       (prev) =>
         ({
@@ -645,10 +643,26 @@ const DashboardPage: NextPage = () => {
             <Thead th={['名前', '勤怠', '勤務時間', '時給', '金額']} />
             <tbody>
               {sale.members.map((member) => {
+                const totalSalary = calcTotalSalary({
+                  name: member.name,
+                  sales: data ? data : [sale],
+                });
                 return (
                   <tr key={member.name} className='border-b'>
                     <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
-                      {member.name}
+                      <div className='min-w-0 flex-auto gap-x-4'>
+                        <p className='font-semibold leading-6 text-gray-900'>
+                          {member.name}
+                        </p>
+                        <div className='mt-2 flex items-center text-sm text-gray-500'>
+                          <span className='inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-md font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10'>
+                            {totalSalary.toLocaleString('ja-JP', {
+                              style: 'currency',
+                              currency: 'JPY',
+                            })}
+                          </span>
+                        </div>
+                      </div>
                     </td>
                     <td className='py-4'>
                       <Select
