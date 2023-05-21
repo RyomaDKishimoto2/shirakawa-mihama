@@ -113,6 +113,7 @@ const createSaleForm = ({
       yachin: 0,
       kounetuhi: 0,
       tushinhi: 0,
+      miyagi: 0,
     },
     weather: sale?.weather || '晴れ',
     total: sale?.total || 0,
