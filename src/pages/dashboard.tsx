@@ -26,7 +26,7 @@ import {
 import { Select } from '../../components/Select';
 import useSWR from 'swr';
 import { SaleRepository } from '../../features/sales/Repositories';
-import { useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { InputWithLabel } from '../../components/Input';
 import { InputOptional } from '../../components/InputOptional';
 import {
@@ -53,6 +53,8 @@ import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ja from 'date-fns/locale/ja';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import { Sales } from '../../features/sales/Entities';
+import AttendanceDetails from '../../components/attendanceDetails';
 
 registerLocale('ja', ja);
 
@@ -131,6 +133,9 @@ const DashboardPage: NextPage = () => {
   const day = Number(router.query.day || now.getDate()) as DaysType;
   const theDay = new Date(year, month - 1, day);
   const dayOfWeek = weekItems[theDay.getDay()];
+  const [showAttendanceDetails, setShowAttendanceDetails] =
+    useState<string>('');
+
   const [loading, setLoading] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date>(
     new Date(`${year}/${month}/${day}`)
@@ -641,7 +646,7 @@ const DashboardPage: NextPage = () => {
         </div>
         <div className='mx-auto mt-9 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
           <table className='w-full text-left text-lg'>
-            <Thead th={['名前', '勤怠', '勤務時間', '時給', '金額']} />
+            <Thead th={['', '名前', '勤怠', '勤務時間', '時給', '金額']} />
             <tbody>
               {sale.members.map((member) => {
                 const totalSalary = calcTotalSalary({
@@ -650,6 +655,15 @@ const DashboardPage: NextPage = () => {
                 });
                 return (
                   <tr key={member.name} className='border-b'>
+                    <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
+                      <button
+                        type='button'
+                        className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                        onClick={() => setShowAttendanceDetails(member.name)}
+                      >
+                        詳細を確認
+                      </button>
+                    </td>
                     <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
                       <div className='min-w-0 flex-auto gap-x-4'>
                         <p className='font-semibold leading-6 text-gray-900'>
@@ -869,6 +883,7 @@ const DashboardPage: NextPage = () => {
               })}
             </tbody>
           </table>
+          <AttendanceDetails sales={data} name={showAttendanceDetails} />
           <div className='mt-5 flex justify-end text-right'>
             <div>
               <label
@@ -921,3 +936,6 @@ const DashboardPage: NextPage = () => {
 };
 
 export default DashboardPage;
+function useRef(arg0: null) {
+  throw new Error('Function not implemented.');
+}
