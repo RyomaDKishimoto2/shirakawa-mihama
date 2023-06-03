@@ -9,6 +9,7 @@ type Props = {
   disabled?: boolean;
   invalid?: boolean;
   InputSize?: 'text-sm' | 'text-2xl' | 'text-3xl' | 'text-lg' | 'text-xl';
+  totalCost?: number;
 };
 
 export const InputWithLabel: FC<Props> = ({
@@ -20,6 +21,7 @@ export const InputWithLabel: FC<Props> = ({
   InputSize = 'text-lg',
   disabled = false,
   invalid = false,
+  totalCost,
 }) => {
   return (
     <div>
@@ -31,6 +33,16 @@ export const InputWithLabel: FC<Props> = ({
       >
         {label}
       </label>
+      {totalCost && (
+        <div className='mt-2 flex items-center text-sm text-gray-500'>
+          <span className='inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-md font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10'>
+            {totalCost.toLocaleString('ja-JP', {
+              style: 'currency',
+              currency: 'JPY',
+            })}
+          </span>
+        </div>
+      )}
       <div className='mt-2.5'>
         <input
           type='text'

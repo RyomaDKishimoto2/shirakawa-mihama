@@ -12,7 +12,7 @@ export default function AttendanceDetails({
 }) {
   const [open, setOpen] = useState(name ? true : false);
   const cancelButtonRef = useRef(null);
-  console.log(open);
+
   useEffect(() => {
     setOpen(name ? true : false);
   }, [name]);

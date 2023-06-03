@@ -32,6 +32,7 @@ import { InputOptional } from '../../components/InputOptional';
 import {
   calcAveDayly,
   calcAveMonthly,
+  calcTotalExpenseCost,
   calcTotalMonthly,
   calcTotalMonthlyGuests,
   calcTotalMonthlyLabor,
@@ -450,6 +451,11 @@ const DashboardPage: NextPage = () => {
         <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
           <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-3'>
             {SUPPLIERS.map((supplier) => {
+              const totalCost = calcTotalExpenseCost({
+                supplierName: supplier,
+                sales: data ? data : [sale],
+              });
+
               return (
                 <InputWithLabel
                   key={supplier}
@@ -465,6 +471,7 @@ const DashboardPage: NextPage = () => {
                       return newSales;
                     });
                   }}
+                  totalCost={totalCost}
                 />
               );
             })}

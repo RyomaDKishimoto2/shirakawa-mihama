@@ -4,6 +4,7 @@ import {
   SalesType,
   HOURS,
   MINUTES,
+  SupplierLabelType,
 } from '../features/const';
 import { Sales } from '../features/sales/Entities';
 import { Member } from '../features/sales/Repositories';
@@ -213,6 +214,19 @@ export const calcTotalSalary = ({
     return s.members.filter((m) => m.name === name);
   });
   return salary.reduce((accum, sale) => accum + sale.amount, 0);
+};
+
+export const calcTotalExpenseCost = ({
+  supplierName,
+  sales,
+}: {
+  supplierName: SupplierLabelType;
+  sales: SalesType[];
+}) => {
+  const dailyCost = sales.map((s) => {
+    return s.suppliers[supplierName] ? s.suppliers[supplierName] : 0;
+  });
+  return dailyCost.reduce((accum, sale) => accum + sale, 0);
 };
 
 export const dateFormat = (date: Date): string => {
