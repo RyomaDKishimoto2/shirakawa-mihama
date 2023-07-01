@@ -4,8 +4,9 @@ import { db } from '../../config/firebase';
 export const RoleType = {
   ADMIN: 'ADMIN',
   USER: 'USER',
+  ZEIRISHI: 'ZEIRISHI',
 } as const;
-export type RoleType = typeof RoleType[keyof typeof RoleType];
+export type RoleType = (typeof RoleType)[keyof typeof RoleType];
 
 export type User = {
   role: RoleType;
