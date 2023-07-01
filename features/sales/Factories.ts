@@ -21,7 +21,8 @@ const createFromResponse = (responses: SalesType[]) => {
       res.impression,
       res.suppliers,
       res.staffSalaries,
-      res.optionals
+      res.optionals,
+      res.fakeCash
     );
   });
 };

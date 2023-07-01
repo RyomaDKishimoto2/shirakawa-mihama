@@ -143,6 +143,31 @@ type Props = {
   sales: SalesType[];
 };
 
+export const calsFakeMonthlyTotal = ({ sales }: { sales: SalesType[] }) => {
+  return sales.reduce(
+    (accum, sale) => accum + (sale.fakeCash ? sale.fakeCash : 0),
+    0
+  );
+};
+
+const createFakeTotal = ({ sale }: { sale: SalesType }) => {
+  return calcCheatSale({ sale }) + sale.card + sale.eMoney;
+};
+
+export const calcFakeAveMonthly = ({ day, sale, sales }: Props) => {
+  const todaySale = createFakeTotal({ sale }); // 今日だけの売上
+  const firstDaySale = day === 1 ? todaySale : null;
+  const MTD = sales.filter((sa) => sa.day < day); // 当月の初めから今日現在まで
+  const MTDS = MTD.reduce(
+    (accum, sale) => accum + createFakeTotal({ sale }),
+    0
+  ); // 当月の初めから今日現在までの売り上げ合計
+  const avgMonthly = firstDaySale
+    ? firstDaySale
+    : (MTDS + todaySale) / (MTD.length + 1); // 月の1日あたりの平均売上
+  return avgMonthly;
+};
+
 export const calcAveMonthly = ({ day, sale, sales }: Props) => {
   const todaySale = sale.card + sale.cash + sale.eMoney; // 今日だけの売上
   const firstDaySale = day === 1 ? todaySale : null;
@@ -153,11 +178,28 @@ export const calcAveMonthly = ({ day, sale, sales }: Props) => {
     : (MTDS + todaySale) / (MTD.length + 1); // 月の1日あたりの平均売上
   return avgMonthly;
 };
+export const calcFakeAveDayly = ({ sale }: { sale: SalesType }) => {
+  const todaySale = createFakeTotal({ sale }); // 今日だけの売上
+  const avgDayly = sale.guests === 0 ? 0 : todaySale / sale.guests; // 日当たり客単価
+  return avgDayly;
+};
 
 export const calcAveDayly = ({ sale }: { sale: SalesType }) => {
   const todaySale = sale.card + sale.cash + sale.eMoney; // 今日だけの売上
   const avgDayly = sale.guests === 0 ? 0 : todaySale / sale.guests; // 日当たり客単価
   return avgDayly;
+};
+
+export const calcFakeTotalMonthly = ({ day, sale, sales }: Props) => {
+  const todaySale = createFakeTotal({ sale }); // 今日だけの売上
+  const firstDaySale = day === 1 ? todaySale : null;
+  const MTD = sales.filter((sa) => sa.day < day); // 当月の初めから今日現在まで
+  const MTDS = MTD.reduce(
+    (accum, sale) => accum + createFakeTotal({ sale }),
+    0
+  ); // 当月の初めから今日現在までの売り上げ合計
+  const monthlyTotal = firstDaySale ? firstDaySale : MTDS + todaySale; // 当月売上合計
+  return monthlyTotal;
 };
 
 export const calcTotalMonthly = ({ day, sale, sales }: Props) => {
@@ -167,6 +209,15 @@ export const calcTotalMonthly = ({ day, sale, sales }: Props) => {
   const MTDS = MTD.reduce((accum, sale) => accum + sale.total, 0); // 当月の初めから今日現在までの売り上げ合計
   const monthlyTotal = firstDaySale ? firstDaySale : MTDS + todaySale; // 当月売上合計
   return monthlyTotal;
+};
+
+export const createFakeCash = ({ sale }: { sale: SalesType }): number => {
+  return sale.fakeCash ? sale.fakeCash : 0;
+};
+
+export const calcCheatSale = ({ sale }: { sale: SalesType }): number => {
+  const fakeCash = createFakeCash({ sale });
+  return sale.cash - fakeCash;
 };
 
 export const calcTotalMonthlyGuests = ({

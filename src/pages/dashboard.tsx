@@ -26,12 +26,16 @@ import {
 import { Select } from '../../components/Select';
 import useSWR from 'swr';
 import { SaleRepository } from '../../features/sales/Repositories';
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { InputWithLabel } from '../../components/Input';
 import { InputOptional } from '../../components/InputOptional';
 import {
   calcAveDayly,
   calcAveMonthly,
+  calcCheatSale,
+  calcFakeAveDayly,
+  calcFakeAveMonthly,
+  calcFakeTotalMonthly,
   calcTotalExpenseCost,
   calcTotalMonthly,
   calcTotalMonthlyGuests,
@@ -54,9 +58,11 @@ import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ja from 'date-fns/locale/ja';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { Sales } from '../../features/sales/Entities';
 import AttendanceDetails from '../../components/attendanceDetails';
-
+import { Switch } from '../../components/Switch';
+import { useAuth } from '../../context/AuthContext';
+import { RoleType } from '@/lib/user';
+import AccessDeninedPage from './403';
 registerLocale('ja', ja);
 
 const createSaleForm = ({
@@ -123,10 +129,12 @@ const createSaleForm = ({
     impression: sale?.impression || '',
     staffSalaries: sale?.staffSalaries || '',
     optionals: sale?.optionals || [],
+    fakeCash: sale?.fakeCash,
   };
 };
 
 const DashboardPage: NextPage = () => {
+  const { user } = useAuth();
   const router = useRouter();
   const now = new Date();
   const year = Number(router.query.year || now.getFullYear()) as YearType;
@@ -136,12 +144,10 @@ const DashboardPage: NextPage = () => {
   const dayOfWeek = weekItems[theDay.getDay()];
   const [showAttendanceDetails, setShowAttendanceDetails] =
     useState<string>('');
-
   const [loading, setLoading] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date>(
     new Date(`${year}/${month}/${day}`)
   );
-
   const handleChange = (date: Date) => {
     setStartDate(date);
     const year = date.getFullYear();
@@ -290,14 +296,19 @@ const DashboardPage: NextPage = () => {
       setLoading(false);
     }
   };
-
-  if (!staff) {
+  const [nomalMode, setNomalMode] = useState<boolean>(true);
+  if (!staff || !user) {
     return (
       <ProtectedRoute>
         <Loading message={'読み込み中..'} />
       </ProtectedRoute>
     );
   }
+  const isZEIRISHI = user.role === RoleType.ZEIRISHI;
+  const isADMIN = user.role === RoleType.ADMIN;
+  const isUpdated = data?.some((d) => d.fakeCash);
+  const showFake =
+    (isZEIRISHI && isUpdated) || (!nomalMode && isUpdated) ? true : false;
 
   return (
     <ProtectedRoute>
@@ -334,615 +345,662 @@ const DashboardPage: NextPage = () => {
             <div className='text-3xl p-2.5'>({dayOfWeek})</div>
           </div>
         </div>
-        <div className='mx-auto mt-16 max-w-3xl sm:mt-20 sm:rounded-lg'>
-          <dl className='mt-16 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-3 sm:gap-y-16 lg:gap-x-8'>
-            <SaleInfoLabel
-              value={calcAveMonthly({ day, sale, sales: data ? data : [sale] })}
-              label={`${month}月平均売上`}
-            />
-            <SaleInfoLabel
-              value={calcAveDayly({ sale })}
-              label={`${month}/${day}平均客単価`}
-            />
-            <SaleInfoLabel
-              value={calcTotalMonthly({
-                day,
-                sale,
-                sales: data ? data : [sale],
-              })}
-              label={`${month}月売上累計`}
-            />
-            <SaleInfoLabel
-              value={`${calcTotalMonthlyGuests({
-                sale,
-                sales: data ? data : [sale],
-              })}人`}
-              label={`${month}月来客数累計`}
-            />
-            <SaleInfoLabel
-              value={calcTotalMonthlyLabor({
-                day,
-                todayLabor: laborTotal,
-                sales: data ? data : [sale],
-              })}
-              label={`${month}月人件費累計`}
-              isSale={true}
-            />
-          </dl>
-        </div>
-        <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
-          <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-3'>
-            <InputWithLabel
-              name={'cash'}
-              value={sale.cash}
-              label={'現金'}
-              labelSize='text-xl'
-              InputSize='text-xl'
-              onChange={(value) => {
-                setSale((sale) => ({
-                  ...sale,
-                  cash: value,
-                  total: sale.card + sale.eMoney + value,
-                }));
-              }}
-            />
-            <InputWithLabel
-              name={'card'}
-              value={sale.card}
-              label={'カード'}
-              labelSize='text-xl'
-              InputSize='text-xl'
-              onChange={(value) => {
-                setSale((sale) => ({
-                  ...sale,
-                  card: value,
-                  total: sale.cash + sale.eMoney + value,
-                }));
-              }}
-            />
-            <InputWithLabel
-              name={'eMoney'}
-              value={sale.eMoney}
-              label={'電子マネー'}
-              labelSize='text-xl'
-              InputSize='text-xl'
-              onChange={(value) => {
-                setSale((sale) => ({
-                  ...sale,
-                  eMoney: value,
-                  total: sale.cash + sale.card + value,
-                }));
-              }}
-            />
-            <InputWithLabel
-              name={'senbero'}
-              value={sale.senbero}
-              label={'せんべろ'}
-              labelSize={'text-lg'}
-              onChange={(value) => {
-                setSale((sale) => ({
-                  ...sale,
-                  senbero: value,
-                }));
-              }}
-            />
-            <InputWithLabel
-              name={'guests'}
-              value={sale.guests}
-              label={'来客数'}
-              labelSize={'text-lg'}
-              onChange={(value) => {
-                setSale((sale) => ({
-                  ...sale,
-                  guests: value,
-                }));
-              }}
-              invalid={isGuestsEmpty(sale)}
-            />
-          </div>
-          <div className='mt-5 flex justify-end text-right'>
-            <LabelWithSaleInfo
-              name='total'
-              value={sale.cash + sale.card + sale.eMoney}
-              label='売上合計'
-            />
-          </div>
-        </div>
-        <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
-          <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-3'>
-            {SUPPLIERS.map((supplier) => {
-              const totalCost = calcTotalExpenseCost({
-                supplierName: supplier,
-                sales: data ? data : [sale],
-              });
-
-              return (
+        {isZEIRISHI && !isUpdated ? (
+          <AccessDeninedPage />
+        ) : (
+          <>
+            <div className='mx-auto mt-16 max-w-3xl sm:mt-20 sm:rounded-lg'>
+              {isUpdated && isADMIN && (
+                <Switch nomalMode={nomalMode} setNomalMode={setNomalMode} />
+              )}
+              <dl className='grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-3 sm:gap-y-16 lg:gap-x-8'>
+                <SaleInfoLabel
+                  value={
+                    showFake
+                      ? calcFakeAveMonthly({
+                          day,
+                          sale,
+                          sales: data ? data : [sale],
+                        })
+                      : calcAveMonthly({
+                          day,
+                          sale,
+                          sales: data ? data : [sale],
+                        })
+                  }
+                  label={`${month}月平均売上`}
+                />
+                <SaleInfoLabel
+                  value={
+                    showFake
+                      ? calcFakeAveDayly({ sale })
+                      : calcAveDayly({ sale })
+                  }
+                  label={`${month}/${day}平均客単価`}
+                />
+                <SaleInfoLabel
+                  value={
+                    showFake
+                      ? calcFakeTotalMonthly({
+                          day,
+                          sale,
+                          sales: data ? data : [sale],
+                        })
+                      : calcTotalMonthly({
+                          day,
+                          sale,
+                          sales: data ? data : [sale],
+                        })
+                  }
+                  label={`${month}月売上累計`}
+                />
+                <SaleInfoLabel
+                  value={`${calcTotalMonthlyGuests({
+                    sale,
+                    sales: data ? data : [sale],
+                  })}人`}
+                  label={`${month}月来客数累計`}
+                />
+                <SaleInfoLabel
+                  value={calcTotalMonthlyLabor({
+                    day,
+                    todayLabor: laborTotal,
+                    sales: data ? data : [sale],
+                  })}
+                  label={`${month}月人件費累計`}
+                  isSale={true}
+                />
+              </dl>
+            </div>
+            <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
+              <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-3'>
                 <InputWithLabel
-                  key={supplier}
-                  name={supplier}
+                  name={'cash'}
+                  value={showFake ? calcCheatSale({ sale }) : sale.cash}
+                  label={'現金'}
                   labelSize='text-xl'
                   InputSize='text-xl'
-                  value={sale.suppliers[supplier]}
-                  label={SUPPLIER_NAME[supplier]}
                   onChange={(value) => {
-                    setSale((prev) => {
-                      const newSales = { ...prev };
-                      newSales.suppliers[supplier] = value;
-                      return newSales;
-                    });
+                    setSale((sale) => ({
+                      ...sale,
+                      cash: value,
+                      total: sale.card + sale.eMoney + value,
+                    }));
                   }}
-                  totalCost={totalCost}
                 />
-              );
-            })}
-            {sale.optionals &&
-              sale.optionals.length > 0 &&
-              sale.optionals.map((optional, i) => {
-                return (
-                  <InputOptional
-                    key={i}
-                    name={optional.name}
-                    value={optional.value}
-                    labelSize='text-xl'
-                    InputSize='text-xl'
-                    label='項目名'
-                    onChangeName={(name) => {
-                      setSale((prev) => ({
-                        ...prev,
-                        optionals: [
-                          ...(prev.optionals
-                            ? prev.optionals.map((op, j) =>
-                                i === j ? { ...op, name: name } : op
-                              )
-                            : []),
-                        ],
-                      }));
-                    }}
-                    onChangeValue={(v) => {
-                      setSale((prev) => ({
-                        ...prev,
-                        optionals: [
-                          ...(prev.optionals
-                            ? prev.optionals.map((op, j) =>
-                                i === j ? { ...op, value: v } : op
-                              )
-                            : []),
-                        ],
-                      }));
-                    }}
-                    invalid={isOptionalNameEmpty(optional)}
-                  />
-                );
-              })}
-
-            <span className='flex items-end'>
-              <button
-                type='button'
-                className='w-full rounded-md bg-indigo-900 px-3 py-2 text-sm text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                onClick={() => {
-                  setSale((prev) => ({
-                    ...prev,
-                    optionals: [
-                      ...(prev.optionals ? prev.optionals : []),
-                      { name: '', value: 0 },
-                    ],
-                  }));
-                }}
-              >
-                <PlusIcon
-                  className='-ml-0.5 mr-1.5 h-5 w-5 text-gray-400 inline'
-                  aria-hidden='true'
+                <InputWithLabel
+                  name={'card'}
+                  value={sale.card}
+                  label={'カード'}
+                  labelSize='text-xl'
+                  InputSize='text-xl'
+                  onChange={(value) => {
+                    setSale((sale) => ({
+                      ...sale,
+                      card: value,
+                      total: sale.cash + sale.eMoney + value,
+                    }));
+                  }}
                 />
-                項目を追加する
-              </button>
-            </span>
-          </div>
-          <div className='mt-5 flex justify-end text-right'>
-            <div>
-              <label
-                htmlFor='total'
-                className='block leading-6 text-gray-400 text-xl'
-              >
-                支払い合計
-              </label>
-              <div className='mt-2.5 text-3xl'>
-                {paymentTotal.toLocaleString('ja-JP', {
-                  style: 'currency',
-                  currency: 'JPY',
-                })}
+                <InputWithLabel
+                  name={'eMoney'}
+                  value={sale.eMoney}
+                  label={'電子マネー'}
+                  labelSize='text-xl'
+                  InputSize='text-xl'
+                  onChange={(value) => {
+                    setSale((sale) => ({
+                      ...sale,
+                      eMoney: value,
+                      total: sale.cash + sale.card + value,
+                    }));
+                  }}
+                />
+                <InputWithLabel
+                  name={'senbero'}
+                  value={sale.senbero}
+                  label={'せんべろ'}
+                  labelSize={'text-lg'}
+                  onChange={(value) => {
+                    setSale((sale) => ({
+                      ...sale,
+                      senbero: value,
+                    }));
+                  }}
+                />
+                <InputWithLabel
+                  name={'guests'}
+                  value={sale.guests}
+                  label={'来客数'}
+                  labelSize={'text-lg'}
+                  onChange={(value) => {
+                    setSale((sale) => ({
+                      ...sale,
+                      guests: value,
+                    }));
+                  }}
+                  invalid={isGuestsEmpty(sale)}
+                />
+              </div>
+              <div className='mt-5 flex justify-end text-right'>
+                <LabelWithSaleInfo
+                  name='total'
+                  value={
+                    showFake
+                      ? calcCheatSale({ sale }) + sale.card + sale.eMoney
+                      : sale.cash + sale.card + sale.eMoney
+                  }
+                  label='売上合計'
+                />
               </div>
             </div>
-          </div>
-        </div>
-        <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
-          <table className='w-full text-center'>
-            <Thead th={['', '釣り銭', '合計']} />
-            <tbody>
-              {CHANGES.map((change) => {
-                return (
-                  <tr key={change} className='border-b hover:bg-gray-50'>
-                    <td className='px-6 py-4 text-lg whitespace-nowrap'>
-                      {CHANGE_TITLES[change]}
-                    </td>
-                    <td className='px-6 py-4'>
-                      <div className='flex items-center justify-center space-x-3'>
-                        <QuantityButton
-                          isAdd={false}
-                          onClick={() => {
-                            const total = sale.changes[change] - 1;
-                            setSale((prev) => {
-                              const newSales = { ...prev };
-                              newSales.changes[change] = total;
-                              return newSales;
-                            });
-                          }}
-                        />
-                        <div>
-                          <input
-                            type='text'
-                            inputMode='numeric'
-                            pattern='\d*'
-                            id={change}
-                            className='block w-16 rounded-lg border border-gray-300 px-2.5 py-1 text-2xl text-gray-900 focus:border-blue-500 focus:ring-blue-500'
-                            value={sale.changes[change]}
+            <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
+              <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-3'>
+                {SUPPLIERS.map((supplier) => {
+                  const totalCost = calcTotalExpenseCost({
+                    supplierName: supplier,
+                    sales: data ? data : [sale],
+                  });
+
+                  return (
+                    <InputWithLabel
+                      key={supplier}
+                      name={supplier}
+                      labelSize='text-xl'
+                      InputSize='text-xl'
+                      value={sale.suppliers[supplier]}
+                      label={SUPPLIER_NAME[supplier]}
+                      onChange={(value) => {
+                        setSale((prev) => {
+                          const newSales = { ...prev };
+                          newSales.suppliers[supplier] = value;
+                          return newSales;
+                        });
+                      }}
+                      totalCost={totalCost}
+                    />
+                  );
+                })}
+                {sale.optionals &&
+                  sale.optionals.length > 0 &&
+                  sale.optionals.map((optional, i) => {
+                    return (
+                      <InputOptional
+                        key={i}
+                        name={optional.name}
+                        value={optional.value}
+                        labelSize='text-xl'
+                        InputSize='text-xl'
+                        label='項目名'
+                        onChangeName={(name) => {
+                          setSale((prev) => ({
+                            ...prev,
+                            optionals: [
+                              ...(prev.optionals
+                                ? prev.optionals.map((op, j) =>
+                                    i === j ? { ...op, name: name } : op
+                                  )
+                                : []),
+                            ],
+                          }));
+                        }}
+                        onChangeValue={(v) => {
+                          setSale((prev) => ({
+                            ...prev,
+                            optionals: [
+                              ...(prev.optionals
+                                ? prev.optionals.map((op, j) =>
+                                    i === j ? { ...op, value: v } : op
+                                  )
+                                : []),
+                            ],
+                          }));
+                        }}
+                        invalid={isOptionalNameEmpty(optional)}
+                      />
+                    );
+                  })}
+
+                <span className='flex items-end'>
+                  <button
+                    type='button'
+                    className='w-full rounded-md bg-indigo-900 px-3 py-2 text-sm text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                    onClick={() => {
+                      setSale((prev) => ({
+                        ...prev,
+                        optionals: [
+                          ...(prev.optionals ? prev.optionals : []),
+                          { name: '', value: 0 },
+                        ],
+                      }));
+                    }}
+                  >
+                    <PlusIcon
+                      className='-ml-0.5 mr-1.5 h-5 w-5 text-gray-400 inline'
+                      aria-hidden='true'
+                    />
+                    項目を追加する
+                  </button>
+                </span>
+              </div>
+              <div className='mt-5 flex justify-end text-right'>
+                <div>
+                  <label
+                    htmlFor='total'
+                    className='block leading-6 text-gray-400 text-xl'
+                  >
+                    支払い合計
+                  </label>
+                  <div className='mt-2.5 text-3xl'>
+                    {paymentTotal.toLocaleString('ja-JP', {
+                      style: 'currency',
+                      currency: 'JPY',
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className='mx-auto mt-16 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
+              <table className='w-full text-center'>
+                <Thead th={['', '釣り銭', '合計']} />
+                <tbody>
+                  {CHANGES.map((change) => {
+                    return (
+                      <tr key={change} className='border-b hover:bg-gray-50'>
+                        <td className='px-6 py-4 text-lg whitespace-nowrap'>
+                          {CHANGE_TITLES[change]}
+                        </td>
+                        <td className='px-6 py-4'>
+                          <div className='flex items-center justify-center space-x-3'>
+                            <QuantityButton
+                              isAdd={false}
+                              onClick={() => {
+                                const total = sale.changes[change] - 1;
+                                setSale((prev) => {
+                                  const newSales = { ...prev };
+                                  newSales.changes[change] = total;
+                                  return newSales;
+                                });
+                              }}
+                            />
+                            <div>
+                              <input
+                                type='text'
+                                inputMode='numeric'
+                                pattern='\d*'
+                                id={change}
+                                className='block w-16 rounded-lg border border-gray-300 px-2.5 py-1 text-2xl text-gray-900 focus:border-blue-500 focus:ring-blue-500'
+                                value={sale.changes[change]}
+                                onChange={(e) => {
+                                  setSale((prev) => {
+                                    const newSales = { ...prev };
+                                    newSales.changes[change] = Number(
+                                      e.target.value
+                                    );
+                                    return newSales;
+                                  });
+                                }}
+                                required
+                              />
+                            </div>
+                            <QuantityButton
+                              isAdd={true}
+                              onClick={() => {
+                                const total = sale.changes[change] + 1;
+                                setSale((prev) => {
+                                  const newSales = { ...prev };
+                                  newSales.changes[change] = total;
+                                  return newSales;
+                                });
+                              }}
+                            />
+                          </div>
+                        </td>
+                        <td className='px-6 py-4 text-lg'>
+                          {calculateChange({
+                            change: sale.changes[change],
+                            type: change,
+                          }).toLocaleString('ja-JP', {
+                            style: 'currency',
+                            currency: 'JPY',
+                          })}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              <div className='mt-5 flex justify-end text-right'>
+                <div>
+                  <label
+                    htmlFor='total'
+                    className='block leading-6 text-gray-400 text-xl'
+                  >
+                    釣り銭合計
+                  </label>
+                  <div className='mt-2.5 text-3xl flex items-center'>
+                    {changesTotal > 0 && changesTotal !== 60000 && (
+                      <span className='mr-3 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-lg font-medium text-red-700 ring-1 ring-inset ring-red-600/10'>
+                        差額:
+                        {(changesTotal - 60000).toLocaleString('ja-JP', {
+                          style: 'currency',
+                          currency: 'JPY',
+                        })}
+                      </span>
+                    )}
+                    {changesTotal.toLocaleString('ja-JP', {
+                      style: 'currency',
+                      currency: 'JPY',
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className='mx-auto mt-9 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
+              <table className='w-full text-left text-lg'>
+                <Thead th={['', '名前', '勤怠', '勤務時間', '時給', '金額']} />
+                <tbody>
+                  {sale.members.map((member) => {
+                    const totalSalary = calcTotalSalary({
+                      name: member.name,
+                      sales: data ? data : [sale],
+                    });
+                    return (
+                      <tr key={member.name} className='border-b'>
+                        <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
+                          <button
+                            type='button'
+                            className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                            onClick={() =>
+                              setShowAttendanceDetails(member.name)
+                            }
+                          >
+                            詳細を確認
+                          </button>
+                        </td>
+                        <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
+                          <div className='min-w-0 flex-auto gap-x-4'>
+                            <p className='font-semibold leading-6 text-gray-900'>
+                              {member.name}
+                            </p>
+                            <div className='mt-2 flex items-center text-sm text-gray-500'>
+                              <span className='inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-md font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10'>
+                                {totalSalary.toLocaleString('ja-JP', {
+                                  style: 'currency',
+                                  currency: 'JPY',
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className='py-4'>
+                          <Select
+                            options={Object.values(STATUS).map((st) => st)}
+                            htmlFor={'kintai'}
+                            textSize={'text-lg'}
+                            value={member.status}
                             onChange={(e) => {
                               setSale((prev) => {
                                 const newSales = { ...prev };
-                                newSales.changes[change] = Number(
-                                  e.target.value
+                                newSales.members = newSales.members.map(
+                                  (value) =>
+                                    value.name === member.name
+                                      ? {
+                                          ...value,
+                                          status: e.target.value as StatusType,
+                                          fromHour:
+                                            e.target.value === STATUS.working
+                                              ? value.fromHour
+                                              : [...HOURS][0],
+                                          fromMin:
+                                            e.target.value === STATUS.working
+                                              ? value.fromMin
+                                              : [...MINUTES][0],
+                                          toHour:
+                                            e.target.value === STATUS.working
+                                              ? value.toHour
+                                              : [...HOURS][0],
+                                          toMin:
+                                            e.target.value === STATUS.working
+                                              ? value.toMin
+                                              : [...MINUTES][0],
+                                          hourly:
+                                            e.target.value === STATUS.working
+                                              ? value.hourly
+                                              : [...HOURLY][0],
+                                          amount:
+                                            e.target.value === STATUS.working
+                                              ? value.amount
+                                              : 0,
+                                        }
+                                      : value
                                 );
                                 return newSales;
                               });
                             }}
-                            required
                           />
-                        </div>
-                        <QuantityButton
-                          isAdd={true}
-                          onClick={() => {
-                            const total = sale.changes[change] + 1;
-                            setSale((prev) => {
-                              const newSales = { ...prev };
-                              newSales.changes[change] = total;
-                              return newSales;
-                            });
-                          }}
-                        />
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 text-lg'>
-                      {calculateChange({
-                        change: sale.changes[change],
-                        type: change,
-                      }).toLocaleString('ja-JP', {
-                        style: 'currency',
-                        currency: 'JPY',
-                      })}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                        </td>
+                        <td className='py-4'>
+                          <div className='flex items-center'>
+                            <Select
+                              options={[...HOURS]}
+                              htmlFor={'fromHours'}
+                              textSize={'text-lg'}
+                              name={'fromHours'}
+                              value={member.fromHour}
+                              onChange={(e) => {
+                                const amount = calculateSalary({
+                                  fromHour: Number(e.target.value) as HourType,
+                                  fromMin: member.fromMin,
+                                  toHour: member.toHour,
+                                  toMin: member.toMin,
+                                  hourly: member.hourly,
+                                });
 
-          <div className='mt-5 flex justify-end text-right'>
-            <div>
-              <label
-                htmlFor='total'
-                className='block leading-6 text-gray-400 text-xl'
-              >
-                釣り銭合計
-              </label>
-              <div className='mt-2.5 text-3xl flex items-center'>
-                {changesTotal > 0 && changesTotal !== 60000 && (
-                  <span className='mr-3 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-lg font-medium text-red-700 ring-1 ring-inset ring-red-600/10'>
-                    差額:
-                    {(changesTotal - 60000).toLocaleString('ja-JP', {
+                                setSale((prev) => {
+                                  const newSales = { ...prev };
+                                  newSales.members = newSales.members.map(
+                                    (value) =>
+                                      value.name === member.name
+                                        ? {
+                                            ...value,
+                                            fromHour: Number(
+                                              e.target.value
+                                            ) as HourType,
+                                            amount: amount <= 0 ? 0 : amount,
+                                          }
+                                        : value
+                                  );
+                                  return newSales;
+                                });
+                              }}
+                              disabled={member.status === '休み'}
+                            />
+                            <span className='mx-1 text-xl'>:</span>
+                            <Select
+                              options={[...MINUTES]}
+                              htmlFor={'fromMin'}
+                              textSize={'text-lg'}
+                              name={'fromMin'}
+                              value={member.fromMin}
+                              onChange={(e) => {
+                                const amount = calculateSalary({
+                                  fromHour: member.fromHour,
+                                  fromMin: Number(e.target.value) as MinuteType,
+                                  toHour: member.toHour,
+                                  toMin: member.toMin,
+                                  hourly: member.hourly,
+                                });
+
+                                setSale((prev) => {
+                                  const newSales = { ...prev };
+                                  newSales.members = newSales.members.map(
+                                    (value) =>
+                                      value.name === member.name
+                                        ? {
+                                            ...value,
+                                            fromMin: Number(
+                                              e.target.value
+                                            ) as MinuteType,
+                                            amount: amount <= 0 ? 0 : amount,
+                                          }
+                                        : value
+                                  );
+                                  return newSales;
+                                });
+                              }}
+                              disabled={member.status === '休み'}
+                            />
+                            <span className='mx-1 text-xl'>~</span>
+                            <Select
+                              options={[
+                                ...HOURS.filter((hour) => {
+                                  return hour >= member.fromHour;
+                                }),
+                              ]}
+                              htmlFor={'toHours'}
+                              textSize={'text-lg'}
+                              name={'toHours'}
+                              value={member.toHour}
+                              onChange={(e) => {
+                                const amount = calculateSalary({
+                                  fromHour: member.fromHour,
+                                  fromMin: member.fromMin,
+                                  toHour: Number(e.target.value) as HourType,
+                                  toMin: member.toMin,
+                                  hourly: member.hourly,
+                                });
+                                setSale((prev) => {
+                                  const newSales = { ...prev };
+                                  newSales.members = newSales.members.map(
+                                    (value) =>
+                                      value.name === member.name
+                                        ? {
+                                            ...value,
+                                            toHour: Number(
+                                              e.target.value
+                                            ) as HourType,
+                                            amount: amount <= 0 ? 0 : amount,
+                                          }
+                                        : value
+                                  );
+                                  return newSales;
+                                });
+                              }}
+                              disabled={member.status === '休み'}
+                            />
+                            <span className='mx-1 text-xl'>:</span>
+                            <Select
+                              options={[...MINUTES]}
+                              htmlFor={'toMin'}
+                              textSize={'text-lg'}
+                              name={'toMin'}
+                              value={member.toMin}
+                              onChange={(e) => {
+                                const amount = calculateSalary({
+                                  fromHour: member.fromHour,
+                                  fromMin: member.fromMin,
+                                  toHour: member.toHour,
+                                  toMin: Number(e.target.value) as MinuteType,
+                                  hourly: member.hourly,
+                                });
+
+                                setSale((prev) => {
+                                  const newSales = { ...prev };
+                                  newSales.members = newSales.members.map(
+                                    (value) =>
+                                      value.name === member.name
+                                        ? {
+                                            ...value,
+                                            toMin: Number(
+                                              e.target.value
+                                            ) as MinuteType,
+                                            amount: amount <= 0 ? 0 : amount,
+                                          }
+                                        : value
+                                  );
+                                  return newSales;
+                                });
+                              }}
+                              disabled={member.status === '休み'}
+                            />
+                          </div>
+                        </td>
+                        <td className='p-4'>{member.hourly}</td>
+                        <td
+                          className={`px-4 py-4 text-lg ${
+                            member.amount < 0 ? 'text-red-700' : ''
+                          }`}
+                        >
+                          {member.amount.toLocaleString('ja-JP', {
+                            style: 'currency',
+                            currency: 'JPY',
+                          })}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <AttendanceDetails sales={data} name={showAttendanceDetails} />
+              <div className='mt-5 flex justify-end text-right'>
+                <div>
+                  <label
+                    htmlFor='total'
+                    className='block leading-6 text-gray-400 text-xl'
+                  >
+                    お給料合計
+                  </label>
+                  <div className='mt-2.5 text-3xl flex items-center'>
+                    <span className='mr-3 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-lg font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10'>
+                      出勤者数
+                      {
+                        sale.members.filter((mem) => mem.status === '出勤')
+                          .length
+                      }
+                      人
+                    </span>
+                    {laborTotal.toLocaleString('ja-JP', {
                       style: 'currency',
                       currency: 'JPY',
                     })}
-                  </span>
-                )}
-                {changesTotal.toLocaleString('ja-JP', {
-                  style: 'currency',
-                  currency: 'JPY',
-                })}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div className='mx-auto mt-9 max-w-3xl overflow-x-auto sm:mt-20 sm:rounded-lg'>
-          <table className='w-full text-left text-lg'>
-            <Thead th={['', '名前', '勤怠', '勤務時間', '時給', '金額']} />
-            <tbody>
-              {sale.members.map((member) => {
-                const totalSalary = calcTotalSalary({
-                  name: member.name,
-                  sales: data ? data : [sale],
-                });
-                return (
-                  <tr key={member.name} className='border-b'>
-                    <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
-                      <button
-                        type='button'
-                        className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                        onClick={() => setShowAttendanceDetails(member.name)}
-                      >
-                        詳細を確認
-                      </button>
-                    </td>
-                    <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
-                      <div className='min-w-0 flex-auto gap-x-4'>
-                        <p className='font-semibold leading-6 text-gray-900'>
-                          {member.name}
-                        </p>
-                        <div className='mt-2 flex items-center text-sm text-gray-500'>
-                          <span className='inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-md font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10'>
-                            {totalSalary.toLocaleString('ja-JP', {
-                              style: 'currency',
-                              currency: 'JPY',
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className='py-4'>
-                      <Select
-                        options={Object.values(STATUS).map((st) => st)}
-                        htmlFor={'kintai'}
-                        textSize={'text-lg'}
-                        value={member.status}
-                        onChange={(e) => {
-                          setSale((prev) => {
-                            const newSales = { ...prev };
-                            newSales.members = newSales.members.map((value) =>
-                              value.name === member.name
-                                ? {
-                                    ...value,
-                                    status: e.target.value as StatusType,
-                                    fromHour:
-                                      e.target.value === STATUS.working
-                                        ? value.fromHour
-                                        : [...HOURS][0],
-                                    fromMin:
-                                      e.target.value === STATUS.working
-                                        ? value.fromMin
-                                        : [...MINUTES][0],
-                                    toHour:
-                                      e.target.value === STATUS.working
-                                        ? value.toHour
-                                        : [...HOURS][0],
-                                    toMin:
-                                      e.target.value === STATUS.working
-                                        ? value.toMin
-                                        : [...MINUTES][0],
-                                    hourly:
-                                      e.target.value === STATUS.working
-                                        ? value.hourly
-                                        : [...HOURLY][0],
-                                    amount:
-                                      e.target.value === STATUS.working
-                                        ? value.amount
-                                        : 0,
-                                  }
-                                : value
-                            );
-                            return newSales;
-                          });
-                        }}
-                      />
-                    </td>
-                    <td className='py-4'>
-                      <div className='flex items-center'>
-                        <Select
-                          options={[...HOURS]}
-                          htmlFor={'fromHours'}
-                          textSize={'text-lg'}
-                          name={'fromHours'}
-                          value={member.fromHour}
-                          onChange={(e) => {
-                            const amount = calculateSalary({
-                              fromHour: Number(e.target.value) as HourType,
-                              fromMin: member.fromMin,
-                              toHour: member.toHour,
-                              toMin: member.toMin,
-                              hourly: member.hourly,
-                            });
 
-                            setSale((prev) => {
-                              const newSales = { ...prev };
-                              newSales.members = newSales.members.map((value) =>
-                                value.name === member.name
-                                  ? {
-                                      ...value,
-                                      fromHour: Number(
-                                        e.target.value
-                                      ) as HourType,
-                                      amount: amount <= 0 ? 0 : amount,
-                                    }
-                                  : value
-                              );
-                              return newSales;
-                            });
-                          }}
-                          disabled={member.status === '休み'}
-                        />
-                        <span className='mx-1 text-xl'>:</span>
-                        <Select
-                          options={[...MINUTES]}
-                          htmlFor={'fromMin'}
-                          textSize={'text-lg'}
-                          name={'fromMin'}
-                          value={member.fromMin}
-                          onChange={(e) => {
-                            const amount = calculateSalary({
-                              fromHour: member.fromHour,
-                              fromMin: Number(e.target.value) as MinuteType,
-                              toHour: member.toHour,
-                              toMin: member.toMin,
-                              hourly: member.hourly,
-                            });
-
-                            setSale((prev) => {
-                              const newSales = { ...prev };
-                              newSales.members = newSales.members.map((value) =>
-                                value.name === member.name
-                                  ? {
-                                      ...value,
-                                      fromMin: Number(
-                                        e.target.value
-                                      ) as MinuteType,
-                                      amount: amount <= 0 ? 0 : amount,
-                                    }
-                                  : value
-                              );
-                              return newSales;
-                            });
-                          }}
-                          disabled={member.status === '休み'}
-                        />
-                        <span className='mx-1 text-xl'>~</span>
-                        <Select
-                          options={[
-                            ...HOURS.filter((hour) => {
-                              return hour >= member.fromHour;
-                            }),
-                          ]}
-                          htmlFor={'toHours'}
-                          textSize={'text-lg'}
-                          name={'toHours'}
-                          value={member.toHour}
-                          onChange={(e) => {
-                            const amount = calculateSalary({
-                              fromHour: member.fromHour,
-                              fromMin: member.fromMin,
-                              toHour: Number(e.target.value) as HourType,
-                              toMin: member.toMin,
-                              hourly: member.hourly,
-                            });
-                            setSale((prev) => {
-                              const newSales = { ...prev };
-                              newSales.members = newSales.members.map((value) =>
-                                value.name === member.name
-                                  ? {
-                                      ...value,
-                                      toHour: Number(
-                                        e.target.value
-                                      ) as HourType,
-                                      amount: amount <= 0 ? 0 : amount,
-                                    }
-                                  : value
-                              );
-                              return newSales;
-                            });
-                          }}
-                          disabled={member.status === '休み'}
-                        />
-                        <span className='mx-1 text-xl'>:</span>
-                        <Select
-                          options={[...MINUTES]}
-                          htmlFor={'toMin'}
-                          textSize={'text-lg'}
-                          name={'toMin'}
-                          value={member.toMin}
-                          onChange={(e) => {
-                            const amount = calculateSalary({
-                              fromHour: member.fromHour,
-                              fromMin: member.fromMin,
-                              toHour: member.toHour,
-                              toMin: Number(e.target.value) as MinuteType,
-                              hourly: member.hourly,
-                            });
-
-                            setSale((prev) => {
-                              const newSales = { ...prev };
-                              newSales.members = newSales.members.map((value) =>
-                                value.name === member.name
-                                  ? {
-                                      ...value,
-                                      toMin: Number(
-                                        e.target.value
-                                      ) as MinuteType,
-                                      amount: amount <= 0 ? 0 : amount,
-                                    }
-                                  : value
-                              );
-                              return newSales;
-                            });
-                          }}
-                          disabled={member.status === '休み'}
-                        />
-                      </div>
-                    </td>
-                    <td className='p-4'>{member.hourly}</td>
-                    <td
-                      className={`px-4 py-4 text-lg ${
-                        member.amount < 0 ? 'text-red-700' : ''
-                      }`}
-                    >
-                      {member.amount.toLocaleString('ja-JP', {
-                        style: 'currency',
-                        currency: 'JPY',
-                      })}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <AttendanceDetails sales={data} name={showAttendanceDetails} />
-          <div className='mt-5 flex justify-end text-right'>
-            <div>
-              <label
-                htmlFor='total'
-                className='block leading-6 text-gray-400 text-xl'
-              >
-                お給料合計
-              </label>
-              <div className='mt-2.5 text-3xl flex items-center'>
-                <span className='mr-3 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-lg font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10'>
-                  出勤者数
-                  {sale.members.filter((mem) => mem.status === '出勤').length}人
-                </span>
-                {laborTotal.toLocaleString('ja-JP', {
-                  style: 'currency',
-                  currency: 'JPY',
-                })}
+            <div className='mx-auto mt-16 max-w-3xl sm:mt-20'>
+              <div className='mt-10 sm:col-span-2'>
+                <h5 className='text-3xl text-gray-400'>所感</h5>
+                <div className='mt-2.5'>
+                  <textarea
+                    name='message'
+                    id='message'
+                    rows={5}
+                    className='block w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-lg text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6'
+                    value={sale.impression}
+                    onChange={(e) =>
+                      setSale((sale) => ({
+                        ...sale,
+                        impression: e.target.value,
+                      }))
+                    }
+                    placeholder='業務連絡・報告事項・改善点など記入してください'
+                  />
+                </div>
               </div>
+              {!showFake && (
+                <div className='text-center mt-16'>
+                  <SubmitButton title={'保存する'} onSubmit={onSubmit} />
+                </div>
+              )}
             </div>
-          </div>
-        </div>
-
-        <div className='mx-auto mt-16 max-w-3xl sm:mt-20'>
-          <div className='mt-10 sm:col-span-2'>
-            <h5 className='text-3xl text-gray-400'>所感</h5>
-            <div className='mt-2.5'>
-              <textarea
-                name='message'
-                id='message'
-                rows={5}
-                className='block w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-lg text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:leading-6'
-                value={sale.impression}
-                onChange={(e) =>
-                  setSale((sale) => ({
-                    ...sale,
-                    impression: e.target.value,
-                  }))
-                }
-                placeholder='業務連絡・報告事項・改善点など記入してください'
-              />
-            </div>
-          </div>
-          <div className='text-center mt-16'>
-            <SubmitButton title={'保存する'} onSubmit={onSubmit} />
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </ProtectedRoute>
   );
 };
 
 export default DashboardPage;
-function useRef(arg0: null) {
-  throw new Error('Function not implemented.');
-}

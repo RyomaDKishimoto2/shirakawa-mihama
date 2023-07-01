@@ -214,6 +214,7 @@ export type SalesType = {
   impression: string;
   staffSalaries: number;
   optionals: OptioanlType[] | [];
+  fakeCash: number;
 };
 
 export const SALE_INIT_VALUE: SalesType = {
@@ -234,4 +235,5 @@ export const SALE_INIT_VALUE: SalesType = {
   impression: '',
   staffSalaries: 0,
   optionals: [],
+  fakeCash: 0,
 };

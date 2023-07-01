@@ -5,9 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { Download } from './download';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 
 const navigation = [{ name: '日報作成', href: '/dashboard', current: true }];
+const navigationForAdmin = [
+  { name: 'スタッフ管理', href: '/members' },
+  { name: '調整', href: '/adjustment' },
+];
 
 const Navbar = ({ children }: { children: React.ReactNode }) => {
   const { user, logOut } = useAuth();
@@ -66,31 +70,36 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                                     : 'text-gray-400 bg-slate-100 hover:text-white',
                                   'rounded-md px-4 py-3 text-lg font-medium'
                                 )}
-                                aria-current={item.current ? 'page' : undefined}
                               >
                                 {item.name}
                               </a>
                             </Link>
                           ))}
-                          {user && user.role === RoleType.ADMIN && (
-                            <Link href='/members' legacyBehavior>
-                              <a
-                                className={classNames(
-                                  router.asPath.includes('/members')
-                                    ? 'bg-gray-900 text-white'
-                                    : 'text-gray-400 bg-slate-100 hover:text-white',
-                                  'rounded-md px-4 py-3 text-lg font-medium'
-                                )}
-                                aria-current={
-                                  router.asPath.includes('/members')
-                                    ? 'page'
-                                    : undefined
-                                }
+                          {user &&
+                            user.role === RoleType.ADMIN &&
+                            navigationForAdmin.map((item) => (
+                              <Link
+                                key={item.name}
+                                href={item.href}
+                                legacyBehavior
                               >
-                                スタッフ管理
-                              </a>
-                            </Link>
-                          )}
+                                <a
+                                  className={classNames(
+                                    router.asPath.includes(item.href)
+                                      ? 'bg-gray-900 text-white'
+                                      : 'text-gray-400 bg-slate-100 hover:text-white',
+                                    'rounded-md px-4 py-3 text-lg font-medium'
+                                  )}
+                                  aria-current={
+                                    router.asPath.includes(item.href)
+                                      ? 'page'
+                                      : undefined
+                                  }
+                                >
+                                  {item.name}
+                                </a>
+                              </Link>
+                            ))}
                         </div>
                       </div>
                     )}
@@ -163,7 +172,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                       className={classNames(
                         router.asPath.includes(item.href)
                           ? 'bg-gray-900 text-white'
-                          : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                          : 'text-gray-500 hover:bg-gray-300 hover:text-white',
                         'block rounded-md px-3 py-2 text-base font-medium'
                       )}
                       aria-current={item.current ? 'page' : undefined}
@@ -171,23 +180,28 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                       {item.name}
                     </Disclosure.Button>
                   ))}
-                  {user && user.role === RoleType.ADMIN && (
-                    <Disclosure.Button
-                      as='a'
-                      href='/members'
-                      className={classNames(
-                        router.asPath.includes('/members')
-                          ? 'bg-gray-900 text-white'
-                          : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                        'block rounded-md px-3 py-2 text-base font-medium'
-                      )}
-                      aria-current={
-                        router.asPath.includes('/members') ? 'page' : undefined
-                      }
-                    >
-                      スタッフ管理
-                    </Disclosure.Button>
-                  )}
+                  {user &&
+                    user.role === RoleType.ADMIN &&
+                    navigationForAdmin.map((item) => (
+                      <Disclosure.Button
+                        key={item.name}
+                        as='a'
+                        href={item.href}
+                        className={classNames(
+                          router.asPath.includes(item.href)
+                            ? 'bg-gray-900 text-white'
+                            : 'text-gray-500 hover:bg-gray-300 hover:text-white',
+                          'block rounded-md px-3 py-2 text-base font-medium'
+                        )}
+                        aria-current={
+                          router.asPath.includes('/members')
+                            ? 'page'
+                            : undefined
+                        }
+                      >
+                        {item.name}
+                      </Disclosure.Button>
+                    ))}
                 </div>
               </Disclosure.Panel>
             </>

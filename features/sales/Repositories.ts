@@ -1,6 +1,11 @@
 import { MonthType, YearType, SalesType, HouryType } from '../const';
 import { MembersFactory, SalesFactory } from './Factories';
-import { createSale, readSales } from '@/lib/sales';
+import {
+  CreateFakeCashInput,
+  createSale,
+  readSales,
+  createFakeCash,
+} from '@/lib/sales';
 import {
   createNewMember,
   readMembers,
@@ -28,9 +33,19 @@ const create = async ({ param }: CreateSaleInput) => {
   return await createSale({ param });
 };
 
+const updateFakeCash = async ({
+  year,
+  month,
+  day,
+  fakeCash,
+}: CreateFakeCashInput) => {
+  return await createFakeCash({ year, month, day, fakeCash });
+};
+
 export const SaleRepository = {
   getSales,
   create,
+  updateFakeCash,
 };
 
 const getMembers = async () => {

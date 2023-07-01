@@ -26,7 +26,8 @@ export class Sales {
     public impression: string,
     public suppliers: SupplierType,
     public staffSalaries: number,
-    public optionals: OptioanlType[]
+    public optionals: OptioanlType[],
+    public fakeCash: number
   ) {}
 }
 
