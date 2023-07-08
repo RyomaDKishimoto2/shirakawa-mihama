@@ -318,6 +318,11 @@ const DashboardPage: NextPage = () => {
           loading ? 'blur-sm' : ''
         }`}
       >
+        <div className='text-center'>
+          <h1 className='text-5xl font-bold tracking-tight text-gray-900 mb-8'>
+            入力前に日付のチェックを忘れずに
+          </h1>
+        </div>
         <div className='grid grid-cols-3 gap-2 mx-auto max-w-3xl'>
           <div className='col-span-3 md:col-span-1'>
             <Select
