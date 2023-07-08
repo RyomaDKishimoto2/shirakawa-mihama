@@ -5,6 +5,7 @@ import {
   HOURS,
   MINUTES,
   SupplierLabelType,
+  tachikaraUid,
 } from '../features/const';
 import { Sales } from '../features/sales/Entities';
 import { Member } from '../features/sales/Repositories';
@@ -286,4 +287,8 @@ export const dateFormat = (date: Date): string => {
   const mm = ('0' + (date.getMonth() + 1)).slice(-2);
   const dd = ('0' + date.getDate()).slice(-2);
   return yyyy + '-' + mm + '-' + dd;
+};
+
+export const isTachikawa = (uid: string) => {
+  return uid === tachikaraUid;
 };

@@ -237,3 +237,5 @@ export const SALE_INIT_VALUE: SalesType = {
   optionals: [],
   fakeCash: 0,
 };
+
+export const tachikaraUid = 'ZCjq6Q1QmENqDYIJJRvB8x4HoR33';

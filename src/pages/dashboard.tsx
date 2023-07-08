@@ -309,7 +309,6 @@ const DashboardPage: NextPage = () => {
   const isUpdated = data?.some((d) => d.fakeCash);
   const showFake =
     (isZEIRISHI && isUpdated) || (!nomalMode && isUpdated) ? true : false;
-
   return (
     <ProtectedRoute>
       {loading && <Loading message={'保存中..'} />}
@@ -319,8 +318,8 @@ const DashboardPage: NextPage = () => {
         }`}
       >
         <div className='text-center'>
-          <h1 className='text-5xl font-bold tracking-tight text-gray-900 mb-8'>
-            入力前に日付のチェックを忘れずに
+          <h1 className='text-5xl font-bold tracking-tight text-red-600 mb-10'>
+            日付の確認を忘れずに！
           </h1>
         </div>
         <div className='grid grid-cols-3 gap-2 mx-auto max-w-3xl'>
@@ -997,7 +996,10 @@ const DashboardPage: NextPage = () => {
               </div>
               {!showFake && (
                 <div className='text-center mt-16'>
-                  <SubmitButton title={'保存する'} onSubmit={onSubmit} />
+                  <SubmitButton
+                    title={`${month}月${day}日(${dayOfWeek})の日報として保存する`}
+                    onSubmit={onSubmit}
+                  />
                 </div>
               )}
             </div>

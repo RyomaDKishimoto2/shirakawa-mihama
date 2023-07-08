@@ -2,10 +2,10 @@ import { RoleType } from '@/lib/user';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
-import { Download } from './download';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
+import { isTachikawa } from '@/utils';
 
 const navigation = [{ name: '日報作成', href: '/dashboard', current: true }];
 const navigationForAdmin = [
@@ -202,6 +202,24 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                         {item.name}
                       </Disclosure.Button>
                     ))}
+                  {/* 立川さんがスタッフの給料を変更できるよう修正 */}
+                  {user && isTachikawa(user.userId) && (
+                    <Disclosure.Button
+                      as='a'
+                      href='/members'
+                      className={classNames(
+                        router.asPath.includes('/members')
+                          ? 'bg-gray-900 text-white'
+                          : 'text-gray-500 hover:bg-gray-300 hover:text-white',
+                        'block rounded-md px-3 py-2 text-base font-medium'
+                      )}
+                      aria-current={
+                        router.asPath.includes('/members') ? 'page' : undefined
+                      }
+                    >
+                      スタッフ管理
+                    </Disclosure.Button>
+                  )}
                 </div>
               </Disclosure.Panel>
             </>

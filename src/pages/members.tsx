@@ -11,7 +11,7 @@ import {
 } from '../../features/sales/Repositories';
 import useSWR from 'swr';
 import { useAuth } from '../../context/AuthContext';
-import { createPassword } from '@/utils';
+import { createPassword, isTachikawa } from '@/utils';
 import { createUser, RoleType } from '@/lib/user';
 import { useRouter } from 'next/router';
 
@@ -33,7 +33,7 @@ const MembersPage: NextPage = () => {
     if (!user) {
       return;
     }
-    if (user.role === RoleType.USER) {
+    if (user.role === RoleType.USER && !isTachikawa(user.userId)) {
       router.push('/dashboard');
     }
   }, [user]);
