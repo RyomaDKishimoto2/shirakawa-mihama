@@ -26,7 +26,7 @@ import {
 import { Select } from '../../components/Select';
 import useSWR from 'swr';
 import { SaleRepository } from '../../features/sales/Repositories';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InputWithLabel } from '../../components/Input';
 import { InputOptional } from '../../components/InputOptional';
 import {
@@ -318,8 +318,8 @@ const DashboardPage: NextPage = () => {
         }`}
       >
         <div className='text-center'>
-          <h1 className='text-5xl font-bold tracking-tight text-red-600 mb-10'>
-            日付の確認を忘れずに！
+          <h1 className='text-2xl md:text-3xl font-mono tracking-tight text-red-600 mb-10'>
+            日付の確認・日報の保存を忘れずに！
           </h1>
         </div>
         <div className='grid grid-cols-3 gap-2 mx-auto max-w-3xl'>
@@ -341,6 +341,7 @@ const DashboardPage: NextPage = () => {
           <div className='col-span-3 md:col-span-2 flex justify-center'>
             <DatePicker
               locale={ja}
+              onFocus={(e) => e.target.blur()}
               dateFormat='yyyy/MM/dd'
               selected={startDate}
               onChange={handleChange}
@@ -568,7 +569,7 @@ const DashboardPage: NextPage = () => {
                 <span className='flex items-end'>
                   <button
                     type='button'
-                    className='w-full rounded-md bg-indigo-900 px-3 py-2 text-sm text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                    className='w-full rounded-md bg-gray-900 px-3 py-2 text-lg text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
                     onClick={() => {
                       setSale((prev) => ({
                         ...prev,
@@ -580,7 +581,7 @@ const DashboardPage: NextPage = () => {
                     }}
                   >
                     <PlusIcon
-                      className='-ml-0.5 mr-1.5 h-5 w-5 text-gray-400 inline'
+                      className='-ml-0.5 mr-1.5 h-7 w-7 text-gray-400 inline'
                       aria-hidden='true'
                     />
                     項目を追加する
@@ -995,7 +996,7 @@ const DashboardPage: NextPage = () => {
                 </div>
               </div>
               {!showFake && (
-                <div className='text-center mt-16'>
+                <div className='w-11/12 h-16 fixed inset-x-0 mx-auto bottom-5 flex justify-center items-center'>
                   <SubmitButton
                     title={`${month}月${day}日(${dayOfWeek})の日報として保存する`}
                     onSubmit={onSubmit}
