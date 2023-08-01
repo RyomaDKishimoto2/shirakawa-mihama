@@ -66,7 +66,11 @@ export const calculateSalary = ({
   toMin,
   hourly,
 }: calculateSalaryProps) => {
-  const hourSalary = (toHour - fromHour) * hourly; // 19-18*1000=1000円
+  let hourSalary = (toHour - fromHour) * hourly; // 19-18*1000=1000円
+  if (toHour >= 23) {
+    const nightWordHour = toHour - 22; // toHour = 23, 24, 25
+    hourSalary += nightWordHour * (hourly * 0.25);
+  }
   const minResult = toMin - fromMin;
   let min;
   if (Math.abs(minResult) === 0) {
