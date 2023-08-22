@@ -7,7 +7,10 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Fragment } from 'react';
 import { isTachikawa } from '@/utils';
 
-const navigation = [{ name: '日報作成', href: '/dashboard', current: true }];
+const navigation = [
+  { name: '日報作成', href: '/dashboard', current: true },
+  { name: '勤怠チェック', href: '/sfhits', current: false },
+];
 const navigationForAdmin = [
   { name: 'スタッフ管理', href: '/members' },
   { name: '調整', href: '/adjustment' },
@@ -58,7 +61,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                     {/* <div className='flex-shrink-0 items-center hidden md:block'>
                       {user && user.role === RoleType.ADMIN && <Download />}
                     </div> */}
-                    {user && user.userId && (
+                    {user && user.userId && user.role === RoleType.USER && (
                       <div className='hidden lg:block'>
                         <div className='flex space-x-2'>
                           {navigation.map((item, index) => (
