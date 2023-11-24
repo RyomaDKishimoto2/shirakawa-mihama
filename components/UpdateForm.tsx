@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SaleRepository } from '../features/sales/Repositories';
 import {
   MemberType,
@@ -36,6 +36,11 @@ export const UpdateForm = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [members, setMembers] = useState<MemberType[]>(todaySale.members);
   const [sale, setSale] = useState<Sale>(todaySale);
+
+  useEffect(() => {
+    setSale(todaySale);
+  }, [todaySale]);
+
   const [suppliers, setSuppliers] = useState<SuppliersType>(
     todaySale.suppliers
   );

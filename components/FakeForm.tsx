@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MemberType, MonthType, YearType, WEATHERS } from '../features/const';
 import { Select } from './Select';
 import { DatePickerForm } from './DatePickerForm';
@@ -19,6 +19,11 @@ export const FakeForm = ({
 }) => {
   const [members, setMembers] = useState<MemberType[]>(todaySale.members);
   const [sale, setSale] = useState<Sale>(todaySale);
+
+  useEffect(() => {
+    setSale(todaySale);
+  }, [todaySale]);
+
   const [suppliers, setSuppliers] = useState<SuppliersType>(
     todaySale.suppliers
   );
