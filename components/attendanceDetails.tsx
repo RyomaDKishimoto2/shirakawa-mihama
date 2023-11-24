@@ -1,29 +1,87 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
+import {
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Sales } from '../features/sales/Entities';
+import { Sale } from '../features/sales/Entities';
 import { Thead } from './Thead';
+import { MemberType } from '../features/const';
 
 export default function AttendanceDetails({
   sales,
   name,
+  setName,
 }: {
-  sales: Sales[] | undefined;
+  sales?: Sale[];
   name: string | null;
+  setName: Dispatch<SetStateAction<string | null>>;
 }) {
-  const [open, setOpen] = useState(name ? true : false);
   const cancelButtonRef = useRef(null);
+  const [open, setOpen] = useState<boolean>(name ? true : false);
 
   useEffect(() => {
     setOpen(name ? true : false);
   }, [name]);
 
+  const findMember = useCallback(
+    (members: MemberType[], name: string | null) => {
+      return members.find((m) => m.name === name && m.status === '出勤');
+    },
+    []
+  );
+
+  // 日付表示ロジックを分割
+  const formatDate = (sale: Sale) => {
+    return `${sale.month}/${sale.day}日`;
+  };
+
+  // 表現ロジックを分割
+  const MemberRow = useMemo(() => {
+    const row = ({ member, sale }: { member: MemberType; sale: Sale }) => (
+      <tr
+        key={`${sale.day}_${name}`}
+        className='border-b'
+      >
+        <td className='p-4 px-5 text-lg w-1/5 whitespace-nowrap'>
+          {formatDate(sale)}
+        </td>
+        <td className='p-4'>
+          {member.amount.toLocaleString('ja-JP', {
+            style: 'currency',
+            currency: 'JPY',
+          })}
+        </td>
+        <td className='p-4'>
+          {member.fromHour}:{String(member.fromMin).padStart(2, '0')}~
+          {member.toHour}:{String(member.toMin).padStart(2, '0')}
+        </td>
+        <td className='p-4'>
+          {member.hourly.toLocaleString('ja-JP', {
+            style: 'currency',
+            currency: 'JPY',
+          })}
+        </td>
+      </tr>
+    );
+    return row;
+  }, []);
+
   return (
-    <Transition.Root show={open} as={Fragment}>
+    <Transition.Root
+      show={open}
+      as={Fragment}
+    >
       <Dialog
         as='div'
         className='relative z-10'
         initialFocus={cancelButtonRef}
-        onClose={setOpen}
+        onClose={() => setName(null)}
       >
         <Transition.Child
           as={Fragment}
@@ -67,37 +125,15 @@ export default function AttendanceDetails({
                             {sales
                               ?.sort((a, b) => a.day - b.day)
                               .map((s) => {
-                                const member = s.members.find(
-                                  (m) => m.name === name && m.status === '出勤'
+                                const member = findMember(s.members, name);
+                                return (
+                                  member && (
+                                    <MemberRow
+                                      member={member}
+                                      sale={s}
+                                    />
+                                  )
                                 );
-                                return member ? (
-                                  <tr
-                                    key={`${s.day}_${name}`}
-                                    className='border-b'
-                                  >
-                                    <td className='p-4 px-5 text-lg w-1/5 whitespace-nowrap'>
-                                      {s.month}/{s.day}日
-                                    </td>
-                                    <td className='p-4'>
-                                      {member.amount.toLocaleString('ja-JP', {
-                                        style: 'currency',
-                                        currency: 'JPY',
-                                      })}
-                                    </td>
-                                    <td className='p-4'>
-                                      {member.fromHour}:
-                                      {String(member.fromMin).padStart(2, '0')}~
-                                      {member.toHour}:
-                                      {String(member.toMin).padStart(2, '0')}
-                                    </td>
-                                    <td className='p-4'>
-                                      {member.hourly.toLocaleString('ja-JP', {
-                                        style: 'currency',
-                                        currency: 'JPY',
-                                      })}
-                                    </td>
-                                  </tr>
-                                ) : null;
                               })}
                           </tbody>
                         </table>
@@ -109,7 +145,7 @@ export default function AttendanceDetails({
                   <button
                     type='button'
                     className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                    onClick={() => setOpen(false)}
+                    onClick={() => setName(null)}
                     ref={cancelButtonRef}
                   >
                     閉じる
