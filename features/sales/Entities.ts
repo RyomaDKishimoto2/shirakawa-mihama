@@ -5,28 +5,52 @@ import {
   WeatherType,
   SupplierType,
   HouryType,
-  OptioanlType,
+  OptionalType,
+  YearType,
+  MonthType,
+  DaysType,
 } from '../const';
 
-export class Sales {
+export type CashData = {
+  cash: number;
+  fakeCash?: number;
+};
+
+export type SaleData = {
+  year: YearType;
+  month: MonthType;
+  day: DaysType;
+  dayOfWeek: DayOfWeekType;
+  cash: number;
+  card: number;
+  eMoney: number;
+  guests: number;
+  weather: WeatherType;
+  total: number;
+  impression: string;
+  staffSalaries: number;
+  optionals: OptionalType[];
+};
+
+export class Sale {
   constructor(
+    public year: YearType,
+    public month: MonthType,
+    public day: DaysType,
+    public dayOfWeek: DayOfWeekType,
     public cash: number,
     public card: number,
-    public year: number,
-    public month: number,
-    public day: number,
     public eMoney: number,
     public guests: number,
-    public senbero: number,
-    public changes: ChangeStateType,
-    public members: MemberType[],
-    public dayOfWeek: DayOfWeekType,
     public weather: WeatherType,
     public total: number,
     public impression: string,
     public suppliers: SupplierType,
     public staffSalaries: number,
-    public optionals: OptioanlType[],
+    // 固有のフィールド
+    public changes: ChangeStateType,
+    public members: MemberType[],
+    public optionals: OptionalType[],
     public fakeCash: number
   ) {}
 }

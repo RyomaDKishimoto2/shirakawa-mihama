@@ -6,9 +6,15 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Fragment } from 'react';
 import { isTachikawa } from '@/utils';
+import { DaysType, MonthType, YearType } from '../features/const';
+
+const now = new Date();
+const year = now.getFullYear() as YearType;
+const month = (now.getMonth() + 1) as MonthType;
+const day = now.getDate() as DaysType;
 
 const navigation = [
-  { name: '日報作成', href: '/dashboard', current: true },
+  { name: '日報作成', href: `/${year}/${month}/${day}`, current: true },
   { name: '勤怠チェック', href: '/sfhits', current: false },
 ];
 const navigationForAdmin = [
@@ -35,7 +41,10 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       {user ? (
-        <Disclosure as='nav' className='bg-white border-b-2'>
+        <Disclosure
+          as='nav'
+          className='bg-white border-b-2'
+        >
           {({ open }) => (
             <>
               <div className='mx-auto max-w-7xl px-2 sm:px-6 lg:px-8'>
@@ -65,7 +74,11 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                       <div className='hidden lg:block'>
                         <div className='flex space-x-2'>
                           {navigation.map((item, index) => (
-                            <Link key={index} href={item.href} legacyBehavior>
+                            <Link
+                              key={index}
+                              href={item.href}
+                              legacyBehavior
+                            >
                               <a
                                 className={classNames(
                                   router.asPath.includes(item.href)
@@ -109,7 +122,10 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                   </div>
                   <div className='absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0'>
                     {/* Profile dropdown */}
-                    <Menu as='div' className='relative ml-3 hidden md:block'>
+                    <Menu
+                      as='div'
+                      className='relative ml-3 hidden md:block'
+                    >
                       <div>
                         <Menu.Button className='flex rounded-fulltext-sm '>
                           <span className='sr-only'>Open user menu</span>
@@ -143,7 +159,10 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                                   ログアウト
                                 </a>
                               ) : (
-                                <Link href='/login' legacyBehavior>
+                                <Link
+                                  href='/login'
+                                  legacyBehavior
+                                >
                                   <a
                                     className={classNames(
                                       router.asPath === '/login'

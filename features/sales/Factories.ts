@@ -1,26 +1,25 @@
-import { SalesType } from '../const';
-import { Members, Sales, StaffInfo } from './Entities';
+import { DaysType, MonthType, SalesType, YearType } from '../const';
+import { Members, Sale, StaffInfo } from './Entities';
 import { CreateMemberInput, Member } from './Repositories';
 
 const createFromResponse = (responses: SalesType[]) => {
   return responses.map((res) => {
-    return new Sales(
+    return new Sale(
+      res.year as YearType,
+      res.month as MonthType,
+      res.day as DaysType,
+      res.dayOfWeek,
       res.cash,
       res.card,
-      res.year,
-      res.month,
-      res.day,
       res.eMoney,
       res.guests,
-      res.senbero,
-      res.changes,
-      res.members,
-      res.dayOfWeek,
       res.weather,
       res.total,
       res.impression,
       res.suppliers,
       res.staffSalaries,
+      res.changes,
+      res.members,
       res.optionals,
       res.fakeCash
     );

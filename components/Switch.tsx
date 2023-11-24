@@ -7,7 +7,7 @@ type Props = {
 
 export const Switch: FC<Props> = ({ nomalMode, setNomalMode }) => {
   return (
-    <div className='flex justify-end mb-3'>
+    <div className='flex justify-center mb-5'>
       <label
         htmlFor='themeSwitcherOne'
         className='border shadow-card relative inline-flex cursor-pointer select-none items-center justify-center rounded-md bg-white p-2'
@@ -39,7 +39,11 @@ export const Switch: FC<Props> = ({ nomalMode, setNomalMode }) => {
             </g>
             <defs>
               <clipPath id='clip0_3122_652'>
-                <rect width='16' height='16' fill='white'></rect>
+                <rect
+                  width='16'
+                  height='16'
+                  fill='white'
+                ></rect>
               </clipPath>
             </defs>
           </svg>

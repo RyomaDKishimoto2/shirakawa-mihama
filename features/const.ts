@@ -40,17 +40,8 @@ export type MemberType = {
   hourly: number;
   amount: number;
 };
-export const MEMBER_INIT_VALUE: MemberType = {
-  name: '',
-  status: '出勤',
-  fromHour: [...HOURS][0],
-  fromMin: [...MINUTES][0],
-  toHour: [...HOURS][0],
-  toMin: [...MINUTES][0],
-  hourly: [...HOURLY][0],
-  amount: 0,
-};
-export type OptioanlType = {
+
+export type OptionalType = {
   name: string;
   value: number;
 };
@@ -67,33 +58,6 @@ export const CHANGES = [
   'Ichi',
 ] as const;
 export type ChangeLabelType = (typeof CHANGES)[number];
-
-export const CHANGE_TITLES = {
-  Ichiman: '1万円',
-  Gosen: '5千円',
-  Nisen: '2千円',
-  Sen: '1千円',
-  Gohyaku: '500円',
-  Hyaku: '100円',
-  Gojyu: '50円',
-  Jyu: '10円',
-  Go: '5円',
-  Ichi: '1円',
-} as const;
-
-export const CHANGE_INIT_VALUES = {
-  Ichiman: 0,
-  Gosen: 0,
-  Nisen: 0,
-  Sen: 0,
-  Gohyaku: 0,
-  Hyaku: 0,
-  Gojyu: 0,
-  Jyu: 0,
-  Go: 0,
-  Ichi: 0,
-};
-
 export type ChangeStateType = {
   Ichiman: number;
   Gosen: number;
@@ -128,51 +92,6 @@ export const SUPPLIERS = [
   'tushinhi',
   'miyagi',
 ] as const;
-export type SupplierLabelType = (typeof SUPPLIERS)[number];
-
-export const SUPPLIER_NAME = {
-  suehiro: '末広商店',
-  sakihama: '崎浜商店',
-  miyazato: '宮里洋酒店',
-  ganaha: 'ガナハミート',
-  BEEFshin: 'BEEFshin',
-  zenoki: 'ゼンオキ食品',
-  sunny: 'サニークリン',
-  shopping: '買い物',
-  zappi: '雑費',
-  kemutou: 'けむとうなか',
-  gyoumu: '業務委託費',
-  furikomiFee: '振込手数料',
-  cardFee: 'カード手数料',
-  eigyou: '営業経費',
-  koutuhi: '旅費・交通費',
-  yachin: '家賃',
-  kounetuhi: '水道光熱費',
-  tushinhi: '通信費',
-  miyagi: '宮城熊さん',
-} as const;
-
-export const SUPPLIER_INIT_VALUES = {
-  suehiro: 0,
-  sakihama: 0,
-  miyazato: 0,
-  ganaha: 0,
-  BEEFshin: 0,
-  zenoki: 0,
-  sunny: 0,
-  shopping: 0,
-  zappi: 0,
-  kemutou: 0,
-  gyoumu: 0,
-  furikomiFee: 0,
-  cardFee: 0,
-  eigyou: 0,
-  koutuhi: 0,
-  yachin: 0,
-  kounetuhi: 0,
-  tushinhi: 0,
-  miyagi: 0,
-};
 
 export type SupplierType = {
   suehiro: number;
@@ -204,7 +123,6 @@ export type SalesType = {
   card: number;
   eMoney: number;
   guests: number;
-  senbero: number;
   changes: ChangeStateType;
   members: MemberType[];
   dayOfWeek: DayOfWeekType;
@@ -213,29 +131,8 @@ export type SalesType = {
   total: number;
   impression: string;
   staffSalaries: number;
-  optionals: OptioanlType[] | [];
+  optionals: OptionalType[] | [];
   fakeCash: number;
-};
-
-export const SALE_INIT_VALUE: SalesType = {
-  year: 0,
-  month: 0,
-  day: 0,
-  cash: 0,
-  card: 0,
-  eMoney: 0,
-  guests: 0,
-  senbero: 0,
-  changes: CHANGE_INIT_VALUES,
-  members: [],
-  suppliers: SUPPLIER_INIT_VALUES,
-  dayOfWeek: '月',
-  weather: '晴れ',
-  total: 0,
-  impression: '',
-  staffSalaries: 0,
-  optionals: [],
-  fakeCash: 0,
 };
 
 export const tachikaraUid = 'ZCjq6Q1QmENqDYIJJRvB8x4HoR33';

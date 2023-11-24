@@ -7,7 +7,6 @@ import {
   CollectionReference,
 } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { CreateSaleInput } from '../../features/sales/Repositories';
 
 type GetSalesInput = {
   year: YearType;
@@ -27,19 +26,8 @@ export const readSales = async (date: GetSalesInput) => {
   return await getDocs(col);
 };
 
-export const createSale = async ({ param }: CreateSaleInput) => {
+export const createSale = async (param: SalesType) => {
   const FILED_NAME = `${param.year}年${param.month}月`;
   const newSalesRef = doc(collection(db, FILED_NAME), `${param.day}日`);
   return await setDoc(newSalesRef, param);
-};
-
-export const createFakeCash = async ({
-  year,
-  month,
-  day,
-  fakeCash,
-}: CreateFakeCashInput) => {
-  const FILED_NAME = `${year}年${month}月`;
-  const newSalesRef = doc(collection(db, FILED_NAME), `${day}日`);
-  return await setDoc(newSalesRef, { fakeCash: fakeCash }, { merge: true });
 };
