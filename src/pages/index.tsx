@@ -18,12 +18,17 @@ const LoginPage = () => {
     formState: { errors },
   } = methods;
 
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+
   const onSubmit = async (data: LoginType) => {
     try {
       const userCredential = await logIn(data.email, data.password);
       const snap = await readUser({ uid: userCredential.user.uid });
       if (snap.exists()) {
-        router.push('/dashboard');
+        router.push(`/${year}/${month}/${day}`);
       } else {
         alert('ユーザーが存在しません');
         router.push('/signup');

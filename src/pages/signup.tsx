@@ -6,6 +6,7 @@ import type { NextPage } from 'next';
 import { FirebaseError } from '@firebase/util';
 import { createUser, RoleType } from '@/lib/user';
 import { Loading } from '../../components/loading';
+import { YearType, MonthType, DaysType } from '../../features/const';
 
 interface SignupType {
   email: string;
@@ -13,9 +14,13 @@ interface SignupType {
   password_confirm: string;
 }
 const SignupPage: NextPage = () => {
-  const methods = useForm<SignupType>({ mode: 'onBlur' });
   const { signUp, user } = useAuth();
+  const methods = useForm<SignupType>({ mode: 'onBlur' });
   const router = useRouter();
+  const now = new Date();
+  const year = now.getFullYear() as YearType;
+  const month = (now.getMonth() + 1) as MonthType;
+  const day = now.getDate() as DaysType;
   const {
     register,
     handleSubmit,
@@ -29,7 +34,7 @@ const SignupPage: NextPage = () => {
         userId: userCredential.user.uid,
         role: RoleType.USER, // RoleType.ADMIN
       });
-      router.push('/dashboard');
+      router.push(`/${year}/${month}/${day}`);
     } catch (error: any) {
       if (error instanceof FirebaseError) {
         console.error(error);
