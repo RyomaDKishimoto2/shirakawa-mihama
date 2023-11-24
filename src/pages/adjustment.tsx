@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 import { SaleRepository } from '../../features/sales/Repositories';
 import useSWR from 'swr';
 import { ArrowDownIcon } from '@heroicons/react/20/solid';
-import { Sales } from '../../features/sales/Entities';
+import { Sale } from '../../features/sales/Entities';
 import { QuantityButton } from '../../components/QuantityButton';
 import { SubmitButton } from '../../components/Submit';
 import { useAuth } from '../../context/AuthContext';
@@ -27,25 +27,30 @@ export function Li({
   setFakeTotal,
 }: {
   isUpdated: boolean;
-  sales: Sales;
-  setSales: Dispatch<SetStateAction<Sales[]>>;
+  sales: Sale;
+  setSales: Dispatch<SetStateAction<Sale[]>>;
   setFakeTotal: Dispatch<SetStateAction<number>>;
 }) {
+  const [sale, setSale] = useState<Sale>(sales);
   const [count, setCount] = useState<number>(
-    sales.fakeCash ? sales.fakeCash / 10000 : 0
+    sale.fakeCash ? sale.fakeCash / 10000 : 0
   );
 
   const [minus, setMinus] = useState<number>(
-    isUpdated ? -createFakeCash({ sale: sales }) : count * -10000
+    isUpdated ? -createFakeCash({ sale }) : count * -10000
   );
 
   useEffect(() => {
+    setSale(sales);
     setCount(sales.fakeCash ? sales.fakeCash / 10000 : 0);
     setMinus(isUpdated ? -createFakeCash({ sale: sales }) : count * -10000);
   }, [sales]);
 
   return (
-    <li key={sales.day} className='px-3 py-3 rounded-lg mb-2 bg-white'>
+    <li
+      key={sales.day}
+      className='px-3 py-3 rounded-lg mb-2 bg-white'
+    >
       <div className='flex items-center space-x-4'>
         <div className='flex-shrink-0'>
           <div className='h-20 w-20 flex-none rounded-full bg-slate-100 flex justify-center items-center text-lg font-medium'>
@@ -54,7 +59,7 @@ export function Li({
         </div>
         <div className='flex-1 min-w-0'>
           <p className='text-xl leading-6 text-gray-900'>
-            {sales.cash.toLocaleString('ja-JP', {
+            {sale.cash.toLocaleString('ja-JP', {
               style: 'currency',
               currency: 'JPY',
             })}
@@ -105,6 +110,7 @@ export function Li({
             <QuantityButton
               isAdd={true}
               onClick={() => {
+                console.log(count);
                 if (count === 0 || (count - 1) * 10000 > sales.cash) {
                   return;
                 }
@@ -144,24 +150,15 @@ const AdjustmentPage: NextPage = () => {
     router.replace({
       query: {
         ...router.query,
+        year,
         month,
       },
     });
   };
-  const [sales, setSales] = useState<Sales[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
   const { data, mutate } = useSWR(
     year && month ? `/api/sales/${year}/${month}` : null,
-    async () => {
-      return await SaleRepository.getSales({ year, month });
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnMount: false,
-      revalidateOnReconnect: false,
-      refreshWhenOffline: false,
-      refreshWhenHidden: false,
-      refreshInterval: 0,
-    }
+    () => SaleRepository.getSales({ year, month })
   );
   const [fakeTotal, setFakeTotal] = useState<number>(
     data ? Math.abs(calsFakeMonthlyTotal({ sales: data })) : 0
@@ -278,7 +275,10 @@ const AdjustmentPage: NextPage = () => {
           </ul>
         </div>
         <div className='text-center mt-16'>
-          <SubmitButton title={'保存する'} onSubmit={onSubmit} />
+          <SubmitButton
+            title={'保存する'}
+            onSubmit={onSubmit}
+          />
         </div>
       </div>
     </ProtectedRoute>

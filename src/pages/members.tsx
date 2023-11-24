@@ -4,7 +4,13 @@ import { Loading } from '../../components/loading';
 import { useEffect, useState } from 'react';
 import { Thead } from '../../components/Thead';
 import { Select } from '../../components/Select';
-import { HOURLY, HouryType } from '../../features/const';
+import {
+  DaysType,
+  HOURLY,
+  HouryType,
+  MonthType,
+  YearType,
+} from '../../features/const';
 import {
   CreateMemberInput,
   MemberRepository,
@@ -21,12 +27,12 @@ const MembersPage: NextPage = () => {
   const [members, setMembers] = useState<CreateMemberInput[]>([]);
   const [newWorker, setNewWorker] = useState<CreateMemberInput | null>(null);
   const router = useRouter();
-  const { data: staff, mutate } = useSWR(
-    '/admin/staffs',
-    async () => {
-      return await MemberRepository.getStaffs();
-    },
-    { refreshWhenHidden: false }
+  const now = new Date();
+  const year = now.getFullYear() as YearType;
+  const month = (now.getMonth() + 1) as MonthType;
+  const day = now.getDate() as DaysType;
+  const { data: staff, mutate } = useSWR('/admin/staffs', () =>
+    MemberRepository.getStaffs()
   );
 
   useEffect(() => {
@@ -34,7 +40,7 @@ const MembersPage: NextPage = () => {
       return;
     }
     if (user.role === RoleType.USER && !isTachikawa(user.userId)) {
-      router.push('/dashboard');
+      router.push(`/${year}/${month}/${day}`);
     }
   }, [user]);
 
@@ -236,7 +242,10 @@ const MembersPage: NextPage = () => {
 
               {members.map((member) => {
                 return !member.isDeleted ? (
-                  <tr key={member.password} className='border-b'>
+                  <tr
+                    key={member.password}
+                    className='border-b'
+                  >
                     <td className='py-4 px-5 text-lg w-9/12 whitespace-nowrap'>
                       {member.name}
                     </td>
