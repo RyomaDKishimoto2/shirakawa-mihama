@@ -33,7 +33,7 @@ export const InputWithLabel: FC<Props> = ({
       >
         {label}
       </label>
-      {totalCost && (
+      {totalCost !== undefined && (
         <div className='mt-2 flex items-center text-sm text-gray-500'>
           <span className='inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-md font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10'>
             {totalCost.toLocaleString('ja-JP', {
