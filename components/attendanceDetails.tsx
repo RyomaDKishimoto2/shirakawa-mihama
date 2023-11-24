@@ -18,7 +18,7 @@ export default function AttendanceDetails({
   name,
   setName,
 }: {
-  sales?: Sale[];
+  sales: Sale[];
   name: string | null;
   setName: Dispatch<SetStateAction<string | null>>;
 }) {

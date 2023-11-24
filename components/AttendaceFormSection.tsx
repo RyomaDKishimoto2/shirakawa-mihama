@@ -27,6 +27,7 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
   const [showAttendanceByName, setShowAttendanceByName] = useState<
     string | null
   >(null);
+
   const calcMonthlyTotalSalary = useCallback((name: string, sales: Sale[]) => {
     return sales.reduce((accum, s) => {
       if (!Array.isArray(s.members)) {
