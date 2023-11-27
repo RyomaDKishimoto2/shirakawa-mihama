@@ -68,7 +68,6 @@ export const Download: FC = () => {
         row.getCell(15).value = isNumber(sale.cash); // 現金売上
         row.getCell(16).value = isNumber(sale.card); // カード売上
         row.getCell(17).value = isNumber(sale.eMoney); // 電子マネー
-        row.getCell(21).value = isNumber(sale.senbero); // せんべろ
         row.getCell(23).value = isNumber(sale.guests); // 総来客数
         row.getCell(24).value = sale.weather; // 天気
         // 任意日にちに出勤したアルバイト名を取得
@@ -134,7 +133,10 @@ export const Download: FC = () => {
       >
         {MONTHS.map((month) => {
           return month <= thisMonth ? (
-            <option key={month} value={month}>
+            <option
+              key={month}
+              value={month}
+            >
               {month}月の売り上げを
             </option>
           ) : null;
