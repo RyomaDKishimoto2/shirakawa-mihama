@@ -161,7 +161,7 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
   return (
     <>
       <table className='w-full text-left text-lg'>
-        <Thead th={['', '名前', '勤怠', '勤務時間', '時給', '金額']} />
+        <Thead th={['名前', '勤怠', '勤務時間', '時給', '金額']} />
         <tbody>
           {members.map((member) => {
             const monthlyTotalSalary = calcMonthlyTotalSalary(
@@ -173,21 +173,12 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
                 key={member.name}
                 className='border-b'
               >
-                <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
-                  <button
-                    type='button'
-                    className='mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto'
-                    onClick={() => setShowAttendanceByName(member.name)}
-                  >
-                    詳細を確認
-                  </button>
-                </td>
-                <td className='py-4 px-5 text-lg w-1/5 whitespace-nowrap'>
+                <td className='py-4 text-lg w-1/5 whitespace-nowrap'>
                   <div className='min-w-0 flex-auto gap-x-4'>
                     <p className='font-semibold leading-6 text-gray-900'>
                       {member.name}
                     </p>
-                    <div className='mt-2 flex items-center text-sm text-gray-500'>
+                    <div className='my-2 flex items-center text-sm text-gray-500'>
                       <span className='inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-md font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10'>
                         {monthlyTotalSalary.toLocaleString('ja-JP', {
                           style: 'currency',
@@ -195,6 +186,13 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
                         })}
                       </span>
                     </div>
+                    <button
+                      type='button'
+                      className='inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto'
+                      onClick={() => setShowAttendanceByName(member.name)}
+                    >
+                      詳細を確認
+                    </button>
                   </div>
                 </td>
                 <td className='py-4'>
@@ -295,9 +293,9 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
                     />
                   </div>
                 </td>
-                <td className='p-4'>{member.hourly}</td>
+                <td className='py-4'>{member.hourly}</td>
                 <td
-                  className={`px-4 py-4 text-lg ${
+                  className={`py-4 text-lg ${
                     member.amount < 0 ? 'text-red-700' : ''
                   }`}
                 >
