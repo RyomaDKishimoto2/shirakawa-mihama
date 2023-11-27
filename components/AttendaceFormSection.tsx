@@ -11,7 +11,7 @@ import {
 import { Thead } from './Thead';
 import { Select } from './Select';
 import { Sale } from '../features/sales/Entities';
-import AttendanceDetails from './AttendanceDetails';
+import AttendanceDetails from './attendanceDetails';
 
 type AttendanceFormSectionProps = {
   sales: Sale[];
