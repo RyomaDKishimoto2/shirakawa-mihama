@@ -63,12 +63,26 @@ export const ChangesFormSection: FC<ChangesFormSectionProps> = ({
       .reduce((partialSum, a) => partialSum + a, 0);
   }, [changes]); // 依存配列に changes を含めます
 
+  const keyOrder = [
+    'Ichiman',
+    'Gosen',
+    'Nisen',
+    'Sen',
+    'Gohyaku',
+    'Hyaku',
+    'Gojyu',
+    'Jyu',
+    'Go',
+    'Ichi',
+  ];
+
   return (
     <>
       <table className='w-full text-center'>
         <Thead th={['', '釣り銭', '合計']} />
         <tbody>
-          {Object.entries(changes).map(([key, value]) => {
+          {keyOrder.map((key) => {
+            const value = changes[key as ChangesNameKey];
             return (
               <tr
                 key={key}
