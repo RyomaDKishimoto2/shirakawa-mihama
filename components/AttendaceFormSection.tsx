@@ -42,19 +42,27 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
     }, 0);
   }, []); // 依存配列が空なので、コンポーネントがマウントされる時にのみ関数が生成されます
 
-  const getMinuteSalary = useCallback((minResult: number, hourly: number) => {
-    if (Math.abs(minResult) === 0) {
-      return 0;
-    } else if (Math.abs(minResult) === 15) {
-      return hourly * 0.25;
-    } else if (Math.abs(minResult) === 30) {
-      return hourly * 0.5;
-    } else if (Math.abs(minResult) === 45) {
-      return hourly * 0.75;
-    } else {
-      return hourly * minResult;
-    }
-  }, []);
+  const getMinuteSalary = useCallback(
+    (fromHour: number, toHour: number, minResult: number, hourly: number) => {
+      if (Math.abs(minResult) === 0) {
+        return 0;
+      }
+
+      const isNight = fromHour >= 22 || toHour >= 22;
+      const rate = isNight ? 1.25 : 1;
+
+      if (Math.abs(minResult) === 15) {
+        return hourly * 0.25 * rate;
+      } else if (Math.abs(minResult) === 30) {
+        return hourly * 0.5 * rate;
+      } else if (Math.abs(minResult) === 45) {
+        return hourly * 0.75 * rate;
+      } else {
+        return hourly * minResult * rate;
+      }
+    },
+    []
+  );
 
   const calculateNightWorkHour = useCallback(
     (toHour: number, hourly: number) => {
@@ -81,7 +89,12 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
       let hourSalary = (toHour - fromHour) * hourly;
 
       hourSalary += calculateNightWorkHour(toHour, hourly);
-      const minSalary = getMinuteSalary(toMin - fromMin, hourly);
+      const minSalary = getMinuteSalary(
+        fromHour,
+        toHour,
+        toMin - fromMin,
+        hourly
+      );
 
       return toMin - fromMin < 0
         ? hourSalary - minSalary
@@ -155,7 +168,9 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
   );
 
   const laborTotal = useCallback(() => {
-    return members.reduce((partialSum, a) => partialSum + a.amount, 0);
+    return members
+      .filter((m) => m.status === STATUS.working)
+      .reduce((partialSum, a) => partialSum + a.amount, 0);
   }, [members]);
 
   return (
