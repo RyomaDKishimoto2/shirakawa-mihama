@@ -39,6 +39,9 @@ export const UpdateForm = ({
 
   useEffect(() => {
     setSale(todaySale);
+    setMembers(todaySale.members);
+    setSuppliers(todaySale.suppliers);
+    setChanges(todaySale.changes);
   }, [todaySale]);
 
   const [suppliers, setSuppliers] = useState<SuppliersType>(
