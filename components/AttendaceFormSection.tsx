@@ -84,21 +84,39 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
   };
 
   const calculateSalary = useCallback(
-    ({ fromHour, fromMin, toHour, toMin, hourly }: CalcSalaryProps) => {
-      if (toHour <= fromHour) return 0;
-      let hourSalary = (toHour - fromHour) * hourly;
+    (
+      startHour: number,
+      startMinute: number,
+      endHour: number,
+      endMinute: number,
+      hourlyRate: number,
+      enhancedRateMultiplier: number, // 基本時給に対する増加率を表します。この例では、22時以降の時給は基本時給の1.25倍になるとされています
+      enhancedRateHour: number, // 増加後の時給が適用される開始時間の「時」部分を表しています
+      enhancedRateMinute: number // 増加後の時給が適用される開始時間の「分」部分を表しています
+    ) => {
+      // 時間と分を小数で表す関数
+      function timeToDecimal(hour: number, minute: number) {
+        return hour + minute / 60;
+      }
 
-      hourSalary += calculateNightWorkHour(toHour, hourly);
-      const minSalary = getMinuteSalary(
-        fromHour,
-        toHour,
-        toMin - fromMin,
-        hourly
+      // 基本時給と増加後の時給を計算
+      const startDecimal = timeToDecimal(startHour, startMinute);
+      const endDecimal = timeToDecimal(endHour, endMinute);
+      const enhancedStartDecimal = timeToDecimal(
+        enhancedRateHour,
+        enhancedRateMinute
       );
+      const enhancedRate = hourlyRate * enhancedRateMultiplier;
 
-      return toMin - fromMin < 0
-        ? hourSalary - minSalary
-        : hourSalary + minSalary;
+      // 22時までと22時以降の勤務時間を計算
+      const hoursBeforeEnhanced =
+        Math.min(endDecimal, enhancedStartDecimal) - startDecimal;
+      const hoursAfterEnhanced = Math.max(0, endDecimal - enhancedStartDecimal);
+
+      // 給料の計算
+      const salary =
+        hoursBeforeEnhanced * hourlyRate + hoursAfterEnhanced * enhancedRate;
+      return salary;
     },
     []
   );
@@ -124,9 +142,7 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
 
   const handleStatusChange = useCallback(
     (member: MemberType, status: StatusType) => {
-      setMembers((prevMembers) =>
-        updateMember(prevMembers, member, { status })
-      );
+      setMembers((prevMembers) => updateMember(prevMembers, member, { status }));
     },
     []
   );
@@ -184,10 +200,7 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
               sales
             );
             return (
-              <tr
-                key={member.name}
-                className='border-b'
-              >
+              <tr key={member.name} className='border-b'>
                 <td className='py-4 text-lg w-1/5 whitespace-nowrap'>
                   <div className='min-w-0 flex-auto gap-x-4'>
                     <p className='font-semibold leading-6 text-gray-900'>
@@ -231,14 +244,25 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
                       value={member.fromHour}
                       onChange={(e) => {
                         const fromHour = Number(e.target.value) as HourType;
-                        const amount = calculateSalary({
+                        const salary = calculateSalary(
                           fromHour,
-                          fromMin: member.fromMin,
-                          toHour: member.toHour,
-                          toMin: member.toMin,
-                          hourly: member.hourly,
-                        });
-                        handleFromHourChange(fromHour, member, amount);
+                          member.fromMin,
+                          member.toHour,
+                          member.toMin,
+                          member.hourly,
+                          1.25,
+                          22,
+                          0
+                        );
+                        handleFromHourChange(fromHour, member, salary);
+                        // const amount = calculateSalary({
+                        //   fromHour,
+                        //   fromMin: member.fromMin,
+                        //   toHour: member.toHour,
+                        //   toMin: member.toMin,
+                        //   hourly: member.hourly,
+                        // });
+                        // handleFromHourChange(fromHour, member, amount);
                       }}
                       disabled={member.status === '休み'}
                     />
@@ -251,14 +275,25 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
                       value={member.fromMin}
                       onChange={(e) => {
                         const fromMin = Number(e.target.value) as MinuteType;
-                        const amount = calculateSalary({
-                          fromHour: member.fromHour,
+                        // const amount = calculateSalary({
+                        //   fromHour: member.fromHour,
+                        //   fromMin,
+                        //   toHour: member.toHour,
+                        //   toMin: member.toMin,
+                        //   hourly: member.hourly,
+                        // });
+                        // handleFromMinChange(fromMin, member, amount);
+                        const salary = calculateSalary(
+                          member.fromHour,
                           fromMin,
-                          toHour: member.toHour,
-                          toMin: member.toMin,
-                          hourly: member.hourly,
-                        });
-                        handleFromMinChange(fromMin, member, amount);
+                          member.toHour,
+                          member.toMin,
+                          member.hourly,
+                          1.25,
+                          22,
+                          0
+                        );
+                        handleFromMinChange(fromMin, member, salary);
                       }}
                       disabled={member.status === '休み'}
                     />
@@ -275,14 +310,25 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
                       value={member.toHour}
                       onChange={(e) => {
                         const toHour = Number(e.target.value) as HourType;
-                        const amount = calculateSalary({
-                          fromHour: member.fromHour,
-                          fromMin: member.fromMin,
+                        const salary = calculateSalary(
+                          member.fromHour,
+                          member.fromMin,
                           toHour,
-                          toMin: member.toMin,
-                          hourly: member.hourly,
-                        });
-                        handleToHourChange(toHour, member, Math.max(amount, 0));
+                          member.toMin,
+                          member.hourly,
+                          1.25,
+                          22,
+                          0
+                        );
+                        handleToHourChange(toHour, member, salary);
+                        // const amount = calculateSalary({
+                        //   fromHour: member.fromHour,
+                        //   fromMin: member.fromMin,
+                        //   toHour,
+                        //   toMin: member.toMin,
+                        //   hourly: member.hourly,
+                        // });
+                        // handleToHourChange(toHour, member, Math.max(amount, 0));
                       }}
                       disabled={member.status === '休み'}
                     />
@@ -295,14 +341,25 @@ export const AttendaceFormSection: FC<AttendanceFormSectionProps> = ({
                       value={member.toMin}
                       onChange={(e) => {
                         const toMin = Number(e.target.value) as MinuteType;
-                        const amount = calculateSalary({
-                          fromHour: member.fromHour,
-                          fromMin: member.fromMin,
-                          toHour: member.toHour,
+                        const salary = calculateSalary(
+                          member.fromHour,
+                          member.fromMin,
+                          member.toHour,
                           toMin,
-                          hourly: member.hourly,
-                        });
-                        handleToMinChange(toMin, member, Math.max(amount, 0));
+                          member.hourly,
+                          1.25,
+                          22,
+                          0
+                        );
+                        handleToMinChange(toMin, member, salary);
+                        // const amount = calculateSalary({
+                        //   fromHour: member.fromHour,
+                        //   fromMin: member.fromMin,
+                        //   toHour: member.toHour,
+                        //   toMin,
+                        //   hourly: member.hourly,
+                        // });
+                        // handleToMinChange(toMin, member, Math.max(amount, 0));
                       }}
                       disabled={member.status === '休み'}
                     />
