@@ -4,7 +4,6 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  signInWithCustomToken,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { readUser, RoleType } from '@/lib/user';
