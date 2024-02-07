@@ -4,13 +4,15 @@ import { useRouter } from "next/router";
 import { MonthType, YearType, DaysType } from "../../features/const";
 import useSWR from "swr";
 import { SaleRepository } from "../../features/sales/Repositories";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { calcTotalSalary } from "@/utils";
 import { MemberRepository } from "../../features/sales/Repositories";
 import DatePicker, { registerLocale } from "react-datepicker";
-import { Tab, Transition } from "@headlessui/react";
+import { Listbox, Tab, Transition } from "@headlessui/react";
 import "react-datepicker/dist/react-datepicker.css";
 import ja from "date-fns/locale/ja";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
+import { Members } from "../../features/sales/Entities";
 registerLocale("ja", ja);
 
 function classNames(...classes: string[]) {
@@ -24,6 +26,7 @@ const ShitPage: NextPage = () => {
   const month = Number(router.query.month || now.getMonth() + 1) as MonthType;
   const day = Number(router.query.day || now.getDate()) as DaysType;
   const [active, setActive] = useState<string>("");
+  const [selected, setSelected] = useState<Members | null>(null);
   const [startDate, setStartDate] = useState<Date>(
     new Date(`${year}/${month}/${day}`)
   );
@@ -83,6 +86,7 @@ const ShitPage: NextPage = () => {
       return;
     }
     setActive(staff[0].name);
+    setSelected(staff[0]);
   }, [staff]);
 
   useEffect(() => {
@@ -95,6 +99,17 @@ const ShitPage: NextPage = () => {
     });
     setTotalSalary(totalSalary);
   }, [active]);
+
+  useEffect(() => {
+    if (!selected || !data) {
+      return;
+    }
+    const totalSalary = calcTotalSalary({
+      name: selected.name,
+      sales: data,
+    });
+    setTotalSalary(totalSalary);
+  }, [selected]);
 
   return (
     <ProtectedRoute>
@@ -118,9 +133,173 @@ const ShitPage: NextPage = () => {
           </div>
         </div>
       </div>
+
+      <div className="block sm:hidden p-3 border">
+        <Listbox value={selected} onChange={setSelected}>
+          {({ open }) => (
+            <>
+              <div className="relative">
+                <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6">
+                  <span className="flex items-center">
+                    <span className="ml-3 block truncate">
+                      {selected?.name}
+                    </span>
+                  </span>
+                  <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </span>
+                </Listbox.Button>
+
+                <Transition
+                  show={open}
+                  as={Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    {staff?.map((person) => (
+                      <Listbox.Option
+                        key={person.name}
+                        className={({ active }) =>
+                          classNames(
+                            active ? "bg-gray-900 text-white" : "text-gray-900",
+                            "relative cursor-default select-none py-2 pl-3 pr-9"
+                          )
+                        }
+                        value={person}
+                      >
+                        {({ selected, active }) => (
+                          <>
+                            <div className="flex items-center">
+                              <span
+                                className={classNames(
+                                  selected ? "font-semibold" : "font-normal",
+                                  "ml-3 block truncate"
+                                )}
+                              >
+                                {person.name}
+                              </span>
+                            </div>
+
+                            {selected ? (
+                              <span
+                                className={classNames(
+                                  active ? "text-white" : "text-indigo-600",
+                                  "absolute inset-y-0 right-0 flex items-center pr-4"
+                                )}
+                              >
+                                <CheckIcon
+                                  className="h-5 w-5"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </Transition>
+              </div>
+            </>
+          )}
+        </Listbox>
+
+        {staff?.map((s) => {
+          return (
+            <div
+              key={s.name}
+              id="tabs-with-underline-1"
+              role="tabpanel"
+              aria-labelledby="tabs-with-underline-item-1"
+              className={`${selected?.name === s.name ? "" : "hidden"}`}
+            >
+              <table className="table-auto w-full mt-3">
+                <thead>
+                  <tr className="text-left">
+                    <th className="px-4 py-2">日付</th>
+                    <th className="px-4 py-2">勤怠</th>
+                    <th className="px-4 py-2">開始時間</th>
+                    <th className="px-4 py-2">終了時間</th>
+                    <th className="px-4 py-2">時給</th>
+                    <th className="px-4 py-2">日給</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data
+                    ?.sort((a, b) => a.day - b.day)
+                    .map((d) => {
+                      return d.members.map((m) => {
+                        return m.name === s.name ? (
+                          <tr key={`${d.day}_${s.name}`}>
+                            <td className="border px-4 py-2">
+                              {d.day}({d.dayOfWeek})
+                            </td>
+                            <td className="border px-4 py-2">{m.status}</td>
+                            <td className="border px-4 py-2">
+                              {m.status === "出勤"
+                                ? m.fromHour +
+                                  ":" +
+                                  (m.fromMin === 0 ? "00" : m.fromMin)
+                                : "---"}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {m.status === "出勤"
+                                ? m.toHour +
+                                  ":" +
+                                  (m.toMin === 0 ? "00" : m.toMin)
+                                : "---"}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {m.status === "出勤"
+                                ? m.hourly.toLocaleString("ja-JP", {
+                                    style: "currency",
+                                    currency: "JPY",
+                                  })
+                                : "---"}
+                            </td>
+                            <td className="border px-4 py-2">
+                              {m.status === "出勤"
+                                ? Math.ceil(m.amount).toLocaleString("ja-JP", {
+                                    style: "currency",
+                                    currency: "JPY",
+                                  })
+                                : "---"}
+                            </td>
+                          </tr>
+                        ) : null;
+                      });
+                    })}
+                </tbody>
+              </table>
+              <div className="mt-5 flex justify-end text-right">
+                <div>
+                  <label
+                    htmlFor="total"
+                    className="block leading-6 text-gray-400 text-xl"
+                  >
+                    月合計
+                  </label>
+                  <div className="mt-2.5 text-3xl flex items-center">
+                    {totalSalary.toLocaleString("ja-JP", {
+                      style: "currency",
+                      currency: "JPY",
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       <div className="flex border p-2">
         <Tab.Group vertical>
-          <Tab.List className="flex flex-col w-40 p-3 space-y-1 bg-white border">
+          <Tab.List className="flex flex-col w-40 p-3 space-y-1 bg-white border hidden sm:block">
             {staff?.map((s) => {
               return (
                 <Tab
@@ -136,7 +315,7 @@ const ShitPage: NextPage = () => {
               );
             })}
           </Tab.List>
-          <Tab.Panels className="flex-1">
+          <Tab.Panels className="flex-1 hidden sm:block">
             {staff?.map((s) => {
               return (
                 <Tab.Panel
