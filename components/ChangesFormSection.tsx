@@ -1,18 +1,17 @@
-import { FC, useMemo } from 'react';
-import { Thead } from './Thead';
-import { QuantityButton } from './QuantityButton';
+import { FC, useMemo } from "react";
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
 
 export const CHANGES = {
-  Ichiman: '1万円',
-  Gosen: '5千円',
-  Nisen: '2千円',
-  Sen: '1千円',
-  Gohyaku: '500円',
-  Hyaku: '100円',
-  Gojyu: '50円',
-  Jyu: '10円',
-  Go: '5円',
-  Ichi: '1円',
+  Ichiman: "1万円",
+  Gosen: "5千円",
+  Nisen: "2千円",
+  Sen: "1千円",
+  Gohyaku: "500円",
+  Hyaku: "100円",
+  Gojyu: "50円",
+  Jyu: "10円",
+  Go: "5円",
+  Ichi: "1円",
 } as const;
 type ChangesNameKey = keyof typeof CHANGES; // keyだけの型
 
@@ -48,6 +47,60 @@ type ChangesFormSectionProps = {
   setChanges: React.Dispatch<React.SetStateAction<ChangesType>>;
 };
 
+const ChangeList: FC<{
+  title: string;
+  cost: number;
+  value: number;
+  setChanges: (v: number) => void;
+  setIncrement: () => void;
+  setDecrement: () => void;
+}> = ({ title, cost, setIncrement, setChanges, setDecrement, value }) => {
+  return (
+    <li className="flex items-center justify-between gap-x-6 py-5">
+      <div className="min-w-[80px]">{title}</div>
+      <div className="max-w-xs mx-auto">
+        <div className="relative flex items-center max-w-[8rem]">
+          <button
+            onClick={setDecrement}
+            type="button"
+            id="decrement-button"
+            data-input-counter-decrement="quantity-input"
+            className="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 focus:ring-2 focus:outline-none"
+          >
+            <MinusIcon className="w-3 h-3 text-gray-900" />
+          </button>
+          <input
+            type="text"
+            id="quantity-input"
+            data-input-counter
+            aria-describedby="helper-text-explanation"
+            className="bg-gray-50 border border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 w-full py-2.5"
+            placeholder="0"
+            value={value}
+            onClick={() => setChanges}
+            required
+          />
+          <button
+            onClick={setIncrement}
+            type="button"
+            id="increment-button"
+            data-input-counter-increment="quantity-input"
+            className="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-3 h-11 focus:ring-gray-100 focus:ring-2 focus:outline-none"
+          >
+            <PlusIcon className="w-3 h-3 text-gray-900" />
+          </button>
+        </div>
+      </div>
+      <div className="text-right min-w-[80px]">
+        {cost.toLocaleString("ja-JP", {
+          style: "currency",
+          currency: "JPY",
+        })}
+      </div>
+    </li>
+  );
+};
+
 export const ChangesFormSection: FC<ChangesFormSectionProps> = ({
   changes,
   setChanges,
@@ -64,112 +117,74 @@ export const ChangesFormSection: FC<ChangesFormSectionProps> = ({
   }, [changes]); // 依存配列に changes を含めます
 
   const keyOrder = [
-    'Ichiman',
-    'Gosen',
-    'Nisen',
-    'Sen',
-    'Gohyaku',
-    'Hyaku',
-    'Gojyu',
-    'Jyu',
-    'Go',
-    'Ichi',
+    "Ichiman",
+    "Gosen",
+    "Nisen",
+    "Sen",
+    "Gohyaku",
+    "Hyaku",
+    "Gojyu",
+    "Jyu",
+    "Go",
+    "Ichi",
   ];
 
   return (
     <>
-      <table className='w-full text-center'>
-        <Thead th={['', '釣り銭', '合計']} />
-        <tbody>
-          {keyOrder.map((key) => {
-            const value = changes[key as ChangesNameKey];
-            return (
-              <tr
-                key={key}
-                className='border-b hover:bg-gray-50'
-              >
-                <td className='px-6 py-4 text-lg whitespace-nowrap'>
-                  {CHANGES[key as ChangesNameKey]}
-                </td>
-                <td className='px-6 py-4'>
-                  <div className='flex items-center justify-center space-x-3'>
-                    <QuantityButton
-                      isAdd={false}
-                      onClick={() => {
-                        const total = changes[key as ChangesNameKey] - 1;
-                        setChanges((prev) => ({
-                          ...prev,
-                          [key]: total,
-                        }));
-                      }}
-                    />
-                    <div>
-                      <input
-                        type='text'
-                        inputMode='numeric'
-                        pattern='\d*'
-                        id={key}
-                        className='block w-16 rounded-lg border border-gray-300 px-2.5 py-1 text-2xl text-gray-900 focus:border-blue-500 focus:ring-blue-500'
-                        value={value}
-                        onChange={(e) =>
-                          setChanges((prev) => ({
-                            ...prev,
-                            [key]: Number(e.target.value),
-                          }))
-                        }
-                        required
-                      />
-                    </div>
-                    <QuantityButton
-                      isAdd={true}
-                      onClick={() => {
-                        const total = changes[key as ChangesNameKey] + 1;
-                        setChanges((prev) => ({
-                          ...prev,
-                          [key]: total,
-                        }));
-                      }}
-                    />
-                  </div>
-                </td>
-                <td className='px-6 py-4 text-lg'>
-                  {calculateChange({
+      <div className="w-full p-4 bg-white border border-gray-200 rounded-lg shadow">
+        <div className="flex items-center justify-between mb-4">
+          <span className="ms-3 inline-flex items-center rounded-md bg-gray-50 px-2 py-1 truncate text-sm leading-5 text-gray-500 ring-1 ring-inset ring-gray-700/10">
+            差額:
+            {(changesTotal - 60000).toLocaleString("ja-JP", {
+              style: "currency",
+              currency: "JPY",
+            })}
+          </span>
+          <h5 className="text-xl font-bold leading-none text-gray-900">
+            {changesTotal.toLocaleString("ja-JP", {
+              style: "currency",
+              currency: "JPY",
+            })}
+          </h5>
+        </div>
+        <div className="flow-root">
+          <ul
+            role="list"
+            className="grid justify-items-stretch gap-y-2 grid-cols-1 divide-y divide-gray-200"
+          >
+            {keyOrder.map((key) => {
+              const value = changes[key as ChangesNameKey];
+              return (
+                <ChangeList
+                  key={key}
+                  value={value}
+                  title={CHANGES[key as ChangesNameKey]}
+                  cost={calculateChange({
                     key: key as ChangesNameKey,
                     changeValue: value,
-                  }).toLocaleString('ja-JP', {
-                    style: 'currency',
-                    currency: 'JPY',
                   })}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      <div className='mt-5 flex justify-end text-right'>
-        <div>
-          <label
-            htmlFor='total'
-            className='block leading-6 text-gray-400 text-xl'
-          >
-            釣り銭合計
-          </label>
-          <div className='mt-2.5 text-3xl flex items-center'>
-            {changesTotal > 0 && changesTotal !== 60000 && (
-              <span className='mr-3 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-lg font-medium text-red-700 ring-1 ring-inset ring-red-600/10'>
-                差額:
-                {(changesTotal - 60000).toLocaleString('ja-JP', {
-                  style: 'currency',
-                  currency: 'JPY',
-                })}
-              </span>
-            )}
-            {changesTotal.toLocaleString('ja-JP', {
-              style: 'currency',
-              currency: 'JPY',
+                  setChanges={(v) =>
+                    setChanges((prev) => ({
+                      ...prev,
+                      [key]: Number(v),
+                    }))
+                  }
+                  setDecrement={() =>
+                    setChanges((prev) => ({
+                      ...prev,
+                      [key]: changes[key as ChangesNameKey] - 1,
+                    }))
+                  }
+                  setIncrement={() =>
+                    setChanges((prev) => ({
+                      ...prev,
+                      [key]: changes[key as ChangesNameKey] + 1,
+                    }))
+                  }
+                />
+              );
             })}
-          </div>
+          </ul>
         </div>
       </div>
     </>

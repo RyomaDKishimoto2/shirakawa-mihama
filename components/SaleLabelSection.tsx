@@ -1,7 +1,12 @@
-import { FC, useMemo } from 'react';
-import { SaleInfoLabel } from './Label';
-import { DaysType, MonthType } from '../features/const';
-import { Sale, SaleData } from '../features/sales/Entities';
+import { FC, useMemo } from "react";
+import { DaysType, MonthType } from "../features/const";
+import { Sale, SaleData } from "../features/sales/Entities";
+import {
+  CurrencyYenIcon,
+  UsersIcon,
+  UserGroupIcon,
+  ArrowTrendingUpIcon,
+} from "@heroicons/react/24/outline";
 
 type Props = {
   currentDay: DaysType;
@@ -99,6 +104,32 @@ type SaleLabelSectionProps = {
   month: MonthType;
 };
 
+const SaleList: FC<{
+  icon: React.ReactNode;
+  title: string;
+  value: number;
+  isNumber?: boolean;
+}> = ({ icon, title, value, isNumber = true }) => {
+  return (
+    <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-darker">
+      <div>
+        <h6 className="mb-1 text-xs font-medium leading-none tracking-wider text-gray-500 uppercase dark:text-primary-light">
+          {title}
+        </h6>
+        <span className="text-xl font-semibold">
+          {isNumber
+            ? value.toLocaleString("ja-JP", {
+                style: "currency",
+                currency: "JPY",
+              })
+            : value + "人"}
+        </span>
+      </div>
+      <div>{icon} </div>
+    </div>
+  );
+};
+
 export const SaleLabelSection: FC<SaleLabelSectionProps> = ({
   currentDay,
   todaySale,
@@ -150,28 +181,43 @@ export const SaleLabelSection: FC<SaleLabelSectionProps> = ({
   );
 
   return (
-    <dl className='grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-3 sm:gap-y-16 lg:gap-x-8'>
-      <SaleInfoLabel
+    <div className="grid grid-cols-1 gap-2 lg:grid-cols-2 xl:grid-cols-4">
+      <SaleList
+        title={`${month}月平均売上`}
         value={aveMonthly}
-        label={`${month}月平均売上`}
+        icon={
+          <CurrencyYenIcon className="w-12 h-12 text-gray-300 dark:text-primary-dark" />
+        }
       />
-      <SaleInfoLabel
+      <SaleList
+        title={`${month}/${todaySale.day}平均客単価`}
         value={aveDayly}
-        label={`${month}/${todaySale.day}平均客単価`}
+        icon={
+          <UsersIcon className="w-12 h-12 text-gray-300 dark:text-primary-dark" />
+        }
       />
-      <SaleInfoLabel
+      <SaleList
+        title={`${month}月売上累計`}
         value={totallyMonthly}
-        label={`${month}月売上累計`}
+        icon={
+          <ArrowTrendingUpIcon className="w-12 h-12 text-gray-300 dark:text-primary-dark" />
+        }
       />
-      <SaleInfoLabel
+      <SaleList
+        title={`${month}月来客数累計`}
         value={totallyGuests}
-        label={`${month}月売上累計`}
+        icon={
+          <UserGroupIcon className="w-12 h-12 text-gray-300 dark:text-primary-dark" />
+        }
+        isNumber={false}
       />
-      <SaleInfoLabel
+      <SaleList
+        title={`${month}月人件費累計`}
         value={totalMonthlyLabor}
-        label={`${month}月人件費累計`}
-        isSale={true}
+        icon={
+          <UsersIcon className="w-12 h-12 text-gray-300 dark:text-primary-dark" />
+        }
       />
-    </dl>
+    </div>
   );
 };

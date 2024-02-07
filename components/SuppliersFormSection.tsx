@@ -1,29 +1,27 @@
-import { useCallback, useMemo } from 'react';
-import { InputWithLabel } from './Input';
-import { InputOptional } from './InputOptional';
-import { PlusIcon } from '@heroicons/react/24/outline';
-import { Sale, SaleData } from '../features/sales/Entities';
+import { FC, useCallback, useMemo } from "react";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { Sale, SaleData } from "../features/sales/Entities";
 
 const SUPPLIERS = {
-  suehiro: '末広商店',
-  sakihama: '崎浜商店',
-  miyazato: '宮里洋酒店',
-  ganaha: 'ガナハミート',
-  BEEFshin: 'BEEFshin',
-  zenoki: 'ゼンオキ食品',
-  sunny: 'サニークリン',
-  shopping: '買い物',
-  zappi: '雑費',
-  kemutou: 'けむとうなか',
-  gyoumu: '業務委託費',
-  furikomiFee: '振込手数料',
-  cardFee: 'カード手数料',
-  eigyou: '営業経費',
-  koutuhi: '旅費・交通費',
-  yachin: '家賃',
-  kounetuhi: '水道光熱費',
-  tushinhi: '通信費',
-  miyagi: '宮城熊さん',
+  suehiro: "末広商店",
+  sakihama: "崎浜商店",
+  miyazato: "宮里洋酒店",
+  ganaha: "ガナハミート",
+  BEEFshin: "BEEFshin",
+  zenoki: "ゼンオキ食品",
+  sunny: "サニークリン",
+  shopping: "買い物",
+  zappi: "雑費",
+  kemutou: "けむとうなか",
+  gyoumu: "業務委託費",
+  furikomiFee: "振込手数料",
+  cardFee: "カード手数料",
+  eigyou: "営業経費",
+  koutuhi: "旅費・交通費",
+  yachin: "家賃",
+  kounetuhi: "水道光熱費",
+  tushinhi: "通信費",
+  miyagi: "宮城熊さん",
 } as const;
 type SupplierNameKey = keyof typeof SUPPLIERS; // keyだけの型
 
@@ -56,6 +54,94 @@ type SuppliersFormSectionProps<T> = {
   optionals: { name: string; value: number }[];
   suppliers: SuppliersType;
   setSuppliers: React.Dispatch<React.SetStateAction<SuppliersType>>;
+};
+
+const SupplierList: FC<{
+  name: string;
+  totalCost: number;
+  value: number;
+  onChange(value: number): void;
+}> = ({ name, totalCost, value, onChange }) => {
+  return (
+    <li className="flex items-center justify-between gap-x-6 py-5">
+      <div className="min-w-[100px]">{name}</div>
+      <div className="max-w-xs mx-auto">
+        <input
+          type="text"
+          id="quantity-input"
+          data-input-counter
+          aria-describedby="helper-text-explanation"
+          className="bg-gray-50 rounded border border-gray-300 h-11 text-right text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
+          placeholder="0"
+          value={value}
+          onChange={(e) => {
+            onChange(Number(e.target.value));
+          }}
+          required
+        />
+      </div>
+      <div className="text-right min-w-[80px]">
+        {totalCost.toLocaleString("ja-JP", {
+          style: "currency",
+          currency: "JPY",
+        })}
+      </div>
+    </li>
+  );
+};
+
+const SupplierListOptional: FC<{
+  name: string;
+  totalCost: number;
+  value: number;
+  onChange(value: number): void;
+  onChangeName(name: string): void;
+  invalid: boolean;
+}> = ({ name, totalCost, value, onChange, onChangeName, invalid = false }) => {
+  return (
+    <li className="flex items-center justify-between gap-x-6 py-5">
+      <div className="relative min-w-[80px]">
+        <input
+          type="text"
+          name={name}
+          id={name}
+          value={name}
+          placeholder="項目名を入力"
+          className={`${
+            invalid && "border border-red-500"
+          } border border-gray-300 bg-gray-50 rounded border border-gray-300 h-11 text-left text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 w-full p-2.5`}
+          onChange={(e) => onChangeName(String(e.target.value))}
+        />
+        {invalid && (
+          <div className="absolute h-14 -left-4 -top-6 text-red-500 whitespace-nowrap">
+            項目名が未入力です
+          </div>
+        )}
+      </div>
+      <div className="max-w-xs mx-auto">
+        <input
+          type="number"
+          name="quantity"
+          id="quantity"
+          step="1"
+          min="0"
+          data-input-counter
+          aria-describedby="helper-text-explanation"
+          className="bg-gray-50 rounded border border-gray-300 h-11 text-right text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
+          placeholder="0"
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          required
+        />
+      </div>
+      <div className="text-right min-w-[80px]">
+        {totalCost.toLocaleString("ja-JP", {
+          style: "currency",
+          currency: "JPY",
+        })}
+      </div>
+    </li>
+  );
 };
 
 export const SuppliersFormSection = <T extends Sale | SaleData>(
@@ -122,7 +208,7 @@ export const SuppliersFormSection = <T extends Sale | SaleData>(
       ...prev,
       optionals: [
         ...(prev.optionals ? prev.optionals : []),
-        { name: '', value: 0 },
+        { name: "", value: 0 },
       ],
     }));
   }, [setSale]);
@@ -139,69 +225,65 @@ export const SuppliersFormSection = <T extends Sale | SaleData>(
 
   return (
     <>
-      <div className='grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-3'>
-        {Object.entries(suppliers)
-          .sort((a, b) => (a[0] > b[0] ? 1 : -1))
-          .map(([key, value]) => {
-            return (
-              <InputWithLabel
-                key={key}
-                name={key}
-                labelSize='text-xl'
-                InputSize='text-xl'
-                value={value}
-                label={SUPPLIERS[key as SupplierNameKey]}
-                onChange={(newValue: number) =>
-                  handleSupplierChange(key as SupplierNameKey, newValue)
-                }
-                totalCost={totalCosts[key as SupplierNameKey]}
+      <div className="w-full p-4 bg-white border border-gray-200 rounded-lg shadow">
+        <div className="flex items-center justify-between mb-4">
+          <span className="ms-3 inline-flex items-center rounded-md bg-gray-50 px-2 py-1 truncate text-sm leading-5 text-gray-500 ring-1 ring-inset ring-gray-700/10">
+            支払い合計
+          </span>
+          <h5 className="text-xl font-bold leading-none text-gray-900">
+            {paymentTotal.toLocaleString("ja-JP", {
+              style: "currency",
+              currency: "JPY",
+            })}
+            <button
+              type="button"
+              className="rounded-md border border-gray-300 rounded ml-3 py-2 px-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              onClick={handleAddOptional}
+            >
+              <PlusIcon
+                className="-ml-0.5 h-4 w-4 text-gray-900 inline"
+                aria-hidden="true"
               />
-            );
-          })}
-        {optionals.length > 0 &&
-          optionals.map((optional, i) => {
-            return (
-              <InputOptional
-                key={i}
-                name={optional.name}
-                value={optional.value}
-                labelSize='text-xl'
-                InputSize='text-xl'
-                label='項目名'
-                onChangeName={(name: string) =>
-                  handleOptionalNameChange(name, i)
-                }
-                onChangeValue={(v: number) => handleOptionalValueChange(v, i)}
-                invalid={isOptionalNameEmpty(optional)}
-              />
-            );
-          })}
-        <span className='flex items-end'>
-          <button
-            type='button'
-            className='w-full rounded-md bg-gray-900 px-3 py-2 text-lg text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-            onClick={handleAddOptional}
+            </button>
+          </h5>
+        </div>
+        <div className="flow-root">
+          <ul
+            role="list"
+            className="grid justify-items-stretch gap-y-2 grid-cols-1 divide-y divide-gray-200"
           >
-            <PlusIcon
-              className='-ml-0.5 mr-1.5 h-7 w-7 text-gray-400 inline'
-              aria-hidden='true'
-            />
-            項目を追加する
-          </button>
-        </span>
-      </div>
-      <div className='mt-5 flex justify-end text-right'>
-        <label
-          htmlFor='total'
-          className='block leading-6 text-gray-400 text-xl'
-        >
-          支払い合計
-        </label>
-        <div className='mt-2.5 text-3xl'>
-          {paymentTotal.toLocaleString('ja-JP', {
-            style: 'currency',
-            currency: 'JPY',
-          })}
+            {optionals.length > 0 &&
+              optionals.map((optional, i) => {
+                return (
+                  <SupplierListOptional
+                    key={i}
+                    name={optional.name}
+                    value={optional.value}
+                    totalCost={optional.value}
+                    onChangeName={(name: string) =>
+                      handleOptionalNameChange(name, i)
+                    }
+                    onChange={(v: number) => handleOptionalValueChange(v, i)}
+                    invalid={isOptionalNameEmpty(optional)}
+                  />
+                );
+              })}
+            {Object.entries(suppliers)
+              .sort((a, b) => (a[0] > b[0] ? 1 : -1))
+              .map(([key, value]) => {
+                return (
+                  <SupplierList
+                    key={key}
+                    name={SUPPLIERS[key as SupplierNameKey]}
+                    onChange={(newValue: number) =>
+                      handleSupplierChange(key as SupplierNameKey, newValue)
+                    }
+                    value={value}
+                    totalCost={totalCosts[key as SupplierNameKey]}
+                  />
+                );
+              })}
+          </ul>
         </div>
       </div>
     </>

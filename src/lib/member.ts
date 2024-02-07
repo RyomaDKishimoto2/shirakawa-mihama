@@ -1,4 +1,4 @@
-import { db } from '../../config/firebase';
+import { db } from "../../config/firebase";
 import {
   doc,
   setDoc,
@@ -7,12 +7,11 @@ import {
   deleteDoc,
   collection,
   CollectionReference,
-} from 'firebase/firestore';
-import { CreateMemberInput, Member } from '../../features/sales/Repositories';
-import { HouryType } from '../../features/const';
+} from "firebase/firestore";
+import { CreateMemberInput, Member } from "../../features/sales/Repositories";
 
-const INFO_FILED_NAME = 'STAFF_INFO';
-const MINIMAM_INFO_FILED_NAME = 'STAFF_MINIMAM_INFO';
+const INFO_FILED_NAME = "STAFF_INFO";
+const MINIMAM_INFO_FILED_NAME = "STAFF_MINIMAM_INFO";
 
 export const readMembers = async () => {
   const col = collection(
@@ -48,11 +47,11 @@ export const createNewMember = async (param: CreateMemberInput) => {
 export const deleteMember = async (name: string) => {
   const ref = doc(collection(db, INFO_FILED_NAME), `${name}`);
   const memberRef = doc(collection(db, MINIMAM_INFO_FILED_NAME), `${name}`);
-  await updateDoc(ref, { isDeleted: true });
+  await deleteDoc(ref);
   await deleteDoc(memberRef);
 };
 
-export const updateSalary = async (name: string, salary: HouryType) => {
+export const updateSalary = async (name: string, salary: number) => {
   const newSalesRef = doc(collection(db, INFO_FILED_NAME), `${name}`);
   const staffMinimamInfoRef = doc(
     collection(db, MINIMAM_INFO_FILED_NAME),
