@@ -9,7 +9,7 @@ import {
   YearType,
   MonthType,
   DaysType,
-} from '../const';
+} from "../const";
 
 export type CashData = {
   cash: number;
@@ -70,6 +70,6 @@ export class StaffInfo {
     public password: string,
     public isDeleted: boolean,
     public createdAt: Date,
-    public salary: HouryType
+    public salary: number
   ) {}
 }
