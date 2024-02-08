@@ -104,7 +104,6 @@ const MemberList: FC<{
         <Select
           options={[...HOURS]}
           htmlFor={"fromHours"}
-          textSize={"text-lg"}
           name={"fromHours"}
           value={member.fromHour}
           onChange={(e) => onChangeFromHour(Number(e.target.value) as HourType)}
@@ -114,7 +113,6 @@ const MemberList: FC<{
         <Select
           options={[...MINUTES]}
           htmlFor={"fromMin"}
-          textSize={"text-lg"}
           name={"fromMin"}
           value={member.fromMin}
           onChange={(e) =>
@@ -130,7 +128,6 @@ const MemberList: FC<{
             }),
           ]}
           htmlFor={"toHours"}
-          textSize={"text-lg"}
           name={"toHours"}
           value={member.toHour}
           onChange={(e) => onChangeToHour(Number(e.target.value) as HourType)}
@@ -140,7 +137,6 @@ const MemberList: FC<{
         <Select
           options={[...MINUTES]}
           htmlFor={"toMin"}
-          textSize={"text-lg"}
           name={"toMin"}
           value={member.toMin}
           onChange={(e) => onChangeToMin(Number(e.target.value) as MinuteType)}

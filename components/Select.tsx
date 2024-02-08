@@ -1,10 +1,10 @@
-import { FC } from 'react';
+import { FC } from "react";
 
 type Props = {
   title?: string;
   options: string[] | number[];
   htmlFor: string;
-  textSize?: 'text-sm' | 'text-3xl' | 'text-lg';
+  textSize?: "text-sm" | "text-3xl" | "text-lg";
   name?: string;
   value: string | number;
   onChange: React.ChangeEventHandler<HTMLSelectElement>;
@@ -16,7 +16,7 @@ export const Select: FC<Props> = ({
   title,
   options,
   htmlFor,
-  textSize = 'text-sm',
+  textSize = "text-sm",
   name,
   value,
   onChange,
@@ -28,7 +28,7 @@ export const Select: FC<Props> = ({
       {title && (
         <label
           htmlFor={htmlFor}
-          className='mb-2 block text-sm font-medium text-gray-900'
+          className="mb-2 block text-sm font-medium text-gray-900"
         >
           {title}
         </label>
@@ -36,8 +36,8 @@ export const Select: FC<Props> = ({
       <select
         id={htmlFor}
         name={name}
-        className={`rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 ${textSize} ${
-          fullWidth && 'w-full'
+        className={`rounded-lg border border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 ${textSize} ${
+          fullWidth && "w-full"
         }`}
         value={value}
         onChange={onChange}
@@ -45,7 +45,7 @@ export const Select: FC<Props> = ({
       >
         {options.map((option) => (
           <option key={option} value={option}>
-            {option === 0 ? '00' : option}
+            {option === 0 ? "00" : option}
           </option>
         ))}
       </select>
