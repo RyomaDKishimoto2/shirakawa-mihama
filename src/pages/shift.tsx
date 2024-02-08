@@ -118,6 +118,7 @@ const ShitPage: NextPage = () => {
           <div className="col-span-5 flex justify-center items-center">
             <div className="relative inline-flex items-center text-center px-3">
               <DatePicker
+                portalId="root-portal"
                 locale={ja}
                 className="p-2.5 border border-gray-400 rounded-md cursor-pointer text-3xl w-full"
                 selected={startDate}
@@ -134,7 +135,7 @@ const ShitPage: NextPage = () => {
         </div>
       </div>
 
-      <div className="block sm:hidden p-3 border">
+      <div className="block sm:hidden p-3 pb-20 border">
         <Listbox value={selected} onChange={setSelected}>
           {({ open }) => (
             <>
@@ -160,7 +161,7 @@ const ShitPage: NextPage = () => {
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                 >
-                  <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                  <Listbox.Options className="absolute mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                     {staff?.map((person) => (
                       <Listbox.Option
                         key={person.name}
@@ -235,7 +236,7 @@ const ShitPage: NextPage = () => {
                     .map((d) => {
                       return d.members.map((m) => {
                         return m.name === s.name ? (
-                          <tr key={`${d.day}_${s.name}`}>
+                          <tr key={`${d.day}_${s.name}`} className="break-all">
                             <td className="border px-4 py-2">
                               {d.day}({d.dayOfWeek})
                             </td>
