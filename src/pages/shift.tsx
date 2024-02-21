@@ -210,92 +210,102 @@ const ShitPage: NextPage = () => {
           )}
         </Listbox>
 
-        {staff?.map((s) => {
-          return (
-            <div
-              key={s.name}
-              id="tabs-with-underline-1"
-              role="tabpanel"
-              aria-labelledby="tabs-with-underline-item-1"
-              className={`${selected?.name === s.name ? "" : "hidden"}`}
-            >
-              <table className="table-auto w-full mt-3">
-                <thead>
-                  <tr className="text-left">
-                    <th className="px-4 py-2">日付</th>
-                    <th className="px-4 py-2">勤怠</th>
-                    <th className="px-4 py-2">開始時間</th>
-                    <th className="px-4 py-2">終了時間</th>
-                    <th className="px-4 py-2">時給</th>
-                    <th className="px-4 py-2">日給</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data
-                    ?.sort((a, b) => a.day - b.day)
-                    .map((d) => {
-                      return d.members.map((m) => {
-                        return m.name === s.name ? (
-                          <tr key={`${d.day}_${s.name}`} className="break-all">
-                            <td className="border px-4 py-2">
-                              {d.day}({d.dayOfWeek})
-                            </td>
-                            <td className="border px-4 py-2">{m.status}</td>
-                            <td className="border px-4 py-2">
-                              {m.status === "出勤"
-                                ? m.fromHour +
-                                  ":" +
-                                  (m.fromMin === 0 ? "00" : m.fromMin)
-                                : "---"}
-                            </td>
-                            <td className="border px-4 py-2">
-                              {m.status === "出勤"
-                                ? m.toHour +
-                                  ":" +
-                                  (m.toMin === 0 ? "00" : m.toMin)
-                                : "---"}
-                            </td>
-                            <td className="border px-4 py-2">
-                              {m.status === "出勤"
-                                ? m.hourly.toLocaleString("ja-JP", {
-                                    style: "currency",
-                                    currency: "JPY",
-                                  })
-                                : "---"}
-                            </td>
-                            <td className="border px-4 py-2">
-                              {m.status === "出勤"
-                                ? Math.ceil(m.amount).toLocaleString("ja-JP", {
-                                    style: "currency",
-                                    currency: "JPY",
-                                  })
-                                : "---"}
-                            </td>
-                          </tr>
-                        ) : null;
-                      });
-                    })}
-                </tbody>
-              </table>
-              <div className="mt-5 flex justify-end text-right">
-                <div>
-                  <label
-                    htmlFor="total"
-                    className="block leading-6 text-gray-400 text-xl"
-                  >
-                    月合計
-                  </label>
-                  <div className="mt-2.5 text-3xl flex items-center">
-                    {totalSalary.toLocaleString("ja-JP", {
-                      style: "currency",
-                      currency: "JPY",
-                    })}
-                  </div>
+        <div className="flex overflow-x-auto border p-2 mt-2 rounded">
+          <div className="flex-none">
+            {staff?.map((s) => {
+              return (
+                <div
+                  key={s.name}
+                  id="tabs-with-underline-1"
+                  role="tabpanel"
+                  aria-labelledby="tabs-with-underline-item-1"
+                  className={`${selected?.name === s.name ? "" : "hidden"}`}
+                >
+                  <table className="table-auto w-full mt-3">
+                    <thead>
+                      <tr className="text-left">
+                        <th className="px-4 py-2">日付</th>
+                        <th className="px-4 py-2">勤怠</th>
+                        <th className="px-4 py-2">開始時間</th>
+                        <th className="px-4 py-2">終了時間</th>
+                        <th className="px-4 py-2">時給</th>
+                        <th className="px-4 py-2">日給</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data
+                        ?.sort((a, b) => a.day - b.day)
+                        .map((d) => {
+                          return d.members.map((m) => {
+                            return m.name === s.name ? (
+                              <tr
+                                key={`${d.day}_${s.name}`}
+                                className="break-all"
+                              >
+                                <td className="border px-4 py-2">
+                                  {d.day}({d.dayOfWeek})
+                                </td>
+                                <td className="border px-4 py-2">{m.status}</td>
+                                <td className="border px-4 py-2">
+                                  {m.status === "出勤"
+                                    ? m.fromHour +
+                                      ":" +
+                                      (m.fromMin === 0 ? "00" : m.fromMin)
+                                    : "---"}
+                                </td>
+                                <td className="border px-4 py-2">
+                                  {m.status === "出勤"
+                                    ? m.toHour +
+                                      ":" +
+                                      (m.toMin === 0 ? "00" : m.toMin)
+                                    : "---"}
+                                </td>
+                                <td className="border px-4 py-2">
+                                  {m.status === "出勤"
+                                    ? m.hourly.toLocaleString("ja-JP", {
+                                        style: "currency",
+                                        currency: "JPY",
+                                      })
+                                    : "---"}
+                                </td>
+                                <td className="border px-4 py-2">
+                                  {m.status === "出勤"
+                                    ? Math.ceil(m.amount).toLocaleString(
+                                        "ja-JP",
+                                        {
+                                          style: "currency",
+                                          currency: "JPY",
+                                        }
+                                      )
+                                    : "---"}
+                                </td>
+                              </tr>
+                            ) : null;
+                          });
+                        })}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="mt-5 flex justify-end text-left">
+          <div>
+            <label
+              htmlFor="total"
+              className="block leading-6 text-gray-400 text-xl"
+            >
+              月合計
+            </label>
+            <div className="mt-2.5 text-3xl flex items-center">
+              {totalSalary.toLocaleString("ja-JP", {
+                style: "currency",
+                currency: "JPY",
+              })}
             </div>
-          );
-        })}
+          </div>
+        </div>
       </div>
 
       <div className="flex border p-2">
