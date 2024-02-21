@@ -117,13 +117,13 @@ export default function Navbar({ children }: { children: React.ReactNode }) {
       {children}
       {!user ? null : (
         <div className="fixed inset-x-0 bottom-0 border border-black">
-          <div className="flex h-14 justify-around border-t border-gray-200 bg-white  shadow-lg">
+          <div className="flex h-14 justify-around border-t border-gray-200 bg-white shadow-lg">
             {user.role === RoleType.ADMIN &&
               navigationForAdmin.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
-                  className="flex flex-col items-center justify-center text-gray-950"
+                  className="flex flex-col items-center justify-center text-gray-950 w-full"
                 >
                   {item.icon}
                   <div className="text-sm">{item.name}</div>
