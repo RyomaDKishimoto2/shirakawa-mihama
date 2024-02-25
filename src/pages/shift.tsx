@@ -4,14 +4,19 @@ import { useRouter } from "next/router";
 import { MonthType, YearType, DaysType } from "../../features/const";
 import useSWR from "swr";
 import { SaleRepository } from "../../features/sales/Repositories";
-import { Fragment, useEffect, useState } from "react";
-import { calcTotalSalary } from "@/utils";
+import { FC, Fragment, useEffect, useState } from "react";
+import { calcTotalSalary, calculateTotalWorkHours } from "@/utils";
 import { MemberRepository } from "../../features/sales/Repositories";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { Listbox, Tab, Transition } from "@headlessui/react";
 import "react-datepicker/dist/react-datepicker.css";
 import ja from "date-fns/locale/ja";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
+import {
+  CheckIcon,
+  ChevronUpDownIcon,
+  CurrencyYenIcon,
+  ClockIcon,
+} from "@heroicons/react/24/solid";
 import { Members } from "../../features/sales/Entities";
 registerLocale("ja", ja);
 
@@ -31,6 +36,8 @@ const ShitPage: NextPage = () => {
     new Date(`${year}/${month}/${day}`)
   );
   const [totalSalary, setTotalSalary] = useState<number>(0);
+  const [totalWorkHours, setTotalWorkHours] = useState<number>(0);
+
   const handleChange = (date: Date) => {
     setStartDate(date);
     const year = date.getFullYear();
@@ -75,6 +82,12 @@ const ShitPage: NextPage = () => {
       sales: data,
     });
     setTotalSalary(totalSalary);
+
+    const totalWorkHours = calculateTotalWorkHours({
+      name: active,
+      sales: data,
+    });
+    setTotalWorkHours(totalWorkHours);
   }, [data]);
 
   useEffect(() => {
@@ -109,7 +122,59 @@ const ShitPage: NextPage = () => {
       sales: data,
     });
     setTotalSalary(totalSalary);
+
+    const totalWorkHours = calculateTotalWorkHours({
+      name: selected.name,
+      sales: data,
+    });
+    setTotalWorkHours(totalWorkHours);
   }, [selected]);
+
+  const SalaryHoursSection: FC<{ isMobile: boolean }> = ({ isMobile }) => {
+    return (
+      <div className={`${isMobile ? "md:hidden" : "hidden sm:block"}`}>
+        <div
+          className={`grid gap-2 mt-3 mb-8 md:grid-cols-2 p-3 ${
+            isMobile ? null : "xl:grid-cols-2"
+          }`}
+        >
+          <div className="min-w-0 overflow-hidden bg-white border border-gray-200 rounded-lg shadow">
+            <div className="p-4 flex items-center">
+              <div className="p-3 rounded-full text-orange-500 bg-orange-500 mr-4">
+                <CurrencyYenIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  {month}月の委託費
+                </p>
+                <p className="text-lg font-semibold text-black">
+                  {totalSalary.toLocaleString("ja-JP", {
+                    style: "currency",
+                    currency: "JPY",
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="min-w-0 overflow-hidden bg-white border border-gray-200 rounded-lg shadow dark:bg-darker">
+            <div className="p-4 flex items-center">
+              <div className="p-3 rounded-full text-orange-500 bg-orange-500 mr-4">
+                <ClockIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  {month}月の労働時間
+                </p>
+                <p className="text-lg font-semibold text-black">
+                  {totalWorkHours}時間
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <ProtectedRoute>
@@ -209,7 +274,7 @@ const ShitPage: NextPage = () => {
             </>
           )}
         </Listbox>
-
+        <SalaryHoursSection isMobile={true} />
         <div className="flex overflow-x-auto border p-2 mt-2 rounded">
           <div className="flex-none">
             {staff?.map((s) => {
@@ -290,24 +355,8 @@ const ShitPage: NextPage = () => {
             })}
           </div>
         </div>
-        <div className="mt-5 flex justify-end text-left">
-          <div>
-            <label
-              htmlFor="total"
-              className="block leading-6 text-gray-400 text-xl"
-            >
-              月合計
-            </label>
-            <div className="mt-2.5 text-3xl flex items-center">
-              {totalSalary.toLocaleString("ja-JP", {
-                style: "currency",
-                currency: "JPY",
-              })}
-            </div>
-          </div>
-        </div>
       </div>
-
+      <SalaryHoursSection isMobile={false} />
       <div className="flex border p-2">
         <Tab.Group vertical>
           <Tab.List className="flex flex-col w-40 p-3 space-y-1 bg-white border hidden sm:block">
@@ -331,7 +380,7 @@ const ShitPage: NextPage = () => {
               return (
                 <Tab.Panel
                   key={s.name}
-                  className="p-4 bg-white border border-l-0"
+                  className="p-4 bg-white border border-l-0 pb-20"
                 >
                   <div
                     key={s.name}
@@ -403,22 +452,6 @@ const ShitPage: NextPage = () => {
                           })}
                       </tbody>
                     </table>
-                    <div className="mt-5 flex justify-end text-right">
-                      <div>
-                        <label
-                          htmlFor="total"
-                          className="block leading-6 text-gray-400 text-xl"
-                        >
-                          月合計
-                        </label>
-                        <div className="mt-2.5 text-3xl flex items-center">
-                          {totalSalary.toLocaleString("ja-JP", {
-                            style: "currency",
-                            currency: "JPY",
-                          })}
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </Tab.Panel>
               );
