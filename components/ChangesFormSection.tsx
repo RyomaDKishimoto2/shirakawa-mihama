@@ -71,13 +71,28 @@ const ChangeList: FC<{
           </button>
           <input
             type="text"
+            value={value}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              // 数値のみ入力可能 (0~9のみ)
+              if (/^[0-9]*$/.test(newValue)) {
+                // 1桁目が0は入力不可能
+                if (newValue !== "0" || newValue.length === 1) {
+                  setChanges(Number(e.target.value));
+                }
+              } else {
+                // 数値以外の値が入力された場合にアラートを表示
+                alert("数値を入力してください。");
+              }
+            }}
+            pattern="[0-9]*"
+            maxLength={3}
+            inputMode="numeric"
             id="quantity-input"
             data-input-counter
             aria-describedby="helper-text-explanation"
             className="bg-gray-50 border border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 w-full py-2.5"
             placeholder="0"
-            value={value}
-            onClick={() => setChanges}
             required
           />
           <button
